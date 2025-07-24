@@ -1,3 +1,14 @@
 kubeconfig
 gke_gcloud_auth_plugin_cache
 istio-*/
+
+# Generated files
+gcp/configure/cert-manager-certificate-issuer.yaml
+gcp/configure/cert-manager-values.yaml
+gcp/configure/external-dns-values.yaml
+gcp/configure/test-ingress-certificate.yaml
+gcp/configure/test-ingress-httpbin-values.yaml
+
+gcp/rasa/kafka/client.properties
+gcp/rasa/kafka/kafka_jaas.conf
+gcp/rasa/kafka/kafka.yaml

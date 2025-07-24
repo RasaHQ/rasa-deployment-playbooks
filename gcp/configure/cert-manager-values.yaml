@@ -1,7 +1,0 @@
-crds:
-  enabled: true
-serviceAccount:
-  annotations:
-    iam.gke.io/gcp-service-account: rasa-dns@gcp-playbook-jm-scripts.iam.gserviceaccount.com
-prometheus:
-  enabled: true
