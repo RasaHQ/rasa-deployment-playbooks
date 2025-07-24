@@ -89,6 +89,11 @@ rasa:
         secretKeyRef:
           name: rasa-secrets
           key: redisPassword
+    - name: RASA_PRO_LICENSE
+      valueFrom:
+        secretKeyRef:
+          name: rasa-secrets
+          key: rasaProLicense
 # Disable other Rasa components for now.
 # https://rasa.com/docs/reference/integrations/analytics/
 rasaProServices:

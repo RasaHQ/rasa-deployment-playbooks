@@ -43,7 +43,7 @@ kubectl delete secret rasa-secrets -n $NAMESPACE
 echo "Creating a Kubernetes secret for these values..."
 kubectl --namespace $NAMESPACE \
 create secret generic rasa-secrets \
---from-literal=rasaProLicense="$(echo RASA_PRO_LICENSE )" \
+--from-literal=rasaProLicense="$(echo $RASA_PRO_LICENSE )" \
 --from-literal=authToken="$(echo $AUTH_TOKEN )" \
 --from-literal=jwtSecret="$(echo $JWT_SECRET)" \
 --from-literal=kafkaSslPassword="$(echo $KAFKA_CLIENT_PASSWORD)" \
