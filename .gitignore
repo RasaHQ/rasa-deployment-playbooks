@@ -16,3 +16,6 @@ gcp/rasa/assistant/repos/*
 gcp/rasa/assistant/values.yaml
 gcp/rasa/ingress/ingress.yaml
 gcp/rasa/ingress/certificate.yaml
+
+gcp/studio/repos/*
+gcp/studio/values.yaml

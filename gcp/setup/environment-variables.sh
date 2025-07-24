@@ -20,6 +20,8 @@ export DB_STUDIO_PASSWORD="passwordmcpasswordface"
 export DB_KEYCLOAK_PASSWORD="passwordmcpasswordface"
 # The license string for Rasa Pro.
 export RASA_PRO_LICENSE="Your Rasa Pro license string here"
+# Your OpenAI API Key.
+export OPENAI_API_KEY="Your OpenAI API Key here"
 #--------------------------------
 
 # You can optionally change the following environment variables if you have specific requirements
