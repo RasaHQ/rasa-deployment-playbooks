@@ -12,3 +12,5 @@ gcp/configure/test-ingress-httpbin-values.yaml
 gcp/rasa/kafka/client.properties
 gcp/rasa/kafka/kafka_jaas.conf
 gcp/rasa/kafka/kafka.yaml
+gcp/rasa/assistant/repos/*
+gcp/rasa/assistant/values.yaml

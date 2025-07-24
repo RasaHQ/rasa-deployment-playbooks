@@ -1,6 +1,6 @@
 # Environment variables for GCP deployment
 
-# You should change the following variables to match your environment
+# You must change the following variables to match your environment
 #--------------------------------
 # Change this to your GCP project ID.
 export PROJECT_ID=gcp-playbook-jm-scripts
@@ -18,6 +18,8 @@ export DB_ASSISTANT_PASSWORD="passwordmcpasswordface"
 export DB_STUDIO_PASSWORD="passwordmcpasswordface"
 # The password you'd like to use for the Keycloak database.
 export DB_KEYCLOAK_PASSWORD="passwordmcpasswordface"
+# The license string for Rasa Pro.
+export RASA_PRO_LICENSE="Your Rasa Pro license string here"
 #--------------------------------
 
 # You can optionally change the following environment variables if you have specific requirements
