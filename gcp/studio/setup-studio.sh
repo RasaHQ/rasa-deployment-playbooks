@@ -16,7 +16,7 @@ kubectl get ns
 
 echo "Pulling Rasa Studio Helm chart..."
 mkdir $SCRIPT_DIR/repos
-helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa-studio --version 2.1.6 --untar --destination $SCRIPT_DIR/repos/rasa-studio-helm
+helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.1.6 --untar --destination $SCRIPT_DIR/repos/studio-helm
 echo "Rasa Studio Helm chart pulled successfully!"
 
 # Next, we'll ensure that other passwords and secret values that Rasa Studio requires are set, before creating a Kubernetes Secret to securely store them in a way that we can reference later on:
