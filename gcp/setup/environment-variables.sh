@@ -3,27 +3,27 @@
 # You should change the following variables to match your environment
 #--------------------------------
 # Change this to your GCP project ID.
-export PROJECT_ID=my-rasa-project-123
+export PROJECT_ID=gcp-playbook-jm-scripts
 # Change this to the region you want to deploy to. Find the available regions here: https://cloud.google.com/about/locations
 export REGION=us-central1
 # Change this to the domain you want to use for your Rasa installation.
-export DOMAIN=rasa.example.com
+export DOMAIN=jm2.infra-gcp.rasa-dev.io
 # Change this to the email address you'll use to request TLS certificates from Let's Encrypt.
-export MY_EMAIL=changeme@$DOMAIN
+export MY_EMAIL=j.macdonald@rasa.com
 # Change this to the name of your company. This will be used to generate unique bucket names.
-export MY_COMPANY_NAME="example-company"
+export MY_COMPANY_NAME="rasa"
 # The password you'd like to use for the Rasa Pro database.
-export DB_ASSISTANT_PASSWORD="changeme"
+export DB_ASSISTANT_PASSWORD="passwordmcpasswordface"
 # The password you'd like to use for the Rasa Studio database.
-export DB_STUDIO_PASSWORD="changeme"
+export DB_STUDIO_PASSWORD="passwordmcpasswordface"
 # The password you'd like to use for the Keycloak database.
-export DB_KEYCLOAK_PASSWORD="changeme"
+export DB_KEYCLOAK_PASSWORD="passwordmcpasswordface"
 #--------------------------------
 
 # You can optionally change the following environment variables if you have specific requirements
 #--------------------------------
 # Random entropy to help generate unique bucket names and avoid collisions.
-export BUCKET_NAME_ENTROPY="xbuc"
+export BUCKET_NAME_ENTROPY="xbucqwerty"
 # The name of the bucket used to store models for Rasa Pro.
 export MODEL_BUCKET="${MY_COMPANY_NAME}-${BUCKET_NAME_ENTROPY}-${NAME}-model"
 # The name of the bucket used to store models for Rasa Studio.
@@ -46,6 +46,12 @@ export DB_STUDIO_USERNAME="studio"
 export DB_KEYCLOAK_DATABASE="keycloak"
 # The username for the Keycloak database.
 export DB_KEYCLOAK_USERNAME="keycloak"
+# The version of PostgreSQL Container to use for applying some configuration to the database.
+export PG_VERSION=17
+# The name of the GCP service account for the Rasa Pro assistant.
+export SERVICE_ACCOUNT_ASSISTANT="${NAME}-assistant@${PROJECT_ID}.iam.gserviceaccount.com"
+# The name of the GCP service account for Studio.
+export SERVICE_ACCOUNT_STUDIO="${NAME}-studio@${PROJECT_ID}.iam.gserviceaccount.com"
 #--------------------------------
 
 

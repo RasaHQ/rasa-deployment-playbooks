@@ -1,4 +1,4 @@
-echo "Enabling required services on GCP..."
+echo "Enabling required services on GCP. This might take a few minutes..."
 # GCP requires that you enable the services you wish to use in each project before you can deploy infrastructure.
 # You'll need to enable the following APIs & Services by logging into the Google Cloud Web UI and ensuring you're in the correct project:
 # - Compute Engine API (https://console.cloud.google.com/apis/library/compute.googleapis.com), for creating the virtual network.
@@ -77,6 +77,8 @@ echo "VPC Peering enabled."
 # In this case, it will allow the Kubernetes cluster to interact with other GCP services.
 echo "Creating GCP Service Account..."
 gcloud iam service-accounts create ${NAME}-gke
+# Wait for 30 seconds to ensure the service account is created before trying to assign roles to it.
+sleep 30
 echo "GCP Service Account created."
 
 # Assign all the required permissions to this service account for things like logging or pulling container images.
@@ -118,6 +120,7 @@ echo "Roles assigned to GCP Service Account."
 # This setup provides a stable, secure Kubernetes environment with effective autoscaling and load balancing features.
 # Since we've included the --async flag, this command will return immediately and the cluster creation will proceed in the background. It may take some time before the cluster is created and running.
 echo "Creating GKE Cluster..."
+echo "Waiting for GKE Cluster to be up before continuing. This may take a few minutes..."
 gcloud container clusters create $NAME \
   --region=$REGION \
   --release-channel=stable \
@@ -135,9 +138,8 @@ gcloud container clusters create $NAME \
   --num-nodes=1 \
   --tags=$NAME \
   --workload-metadata=GKE_METADATA \
-  --workload-pool=$PROJECT_ID.svc.id.goog \
-  --async
-echo "GKE Cluster will continue to deploy in the background..."
+  --workload-pool=$PROJECT_ID.svc.id.goog 
+echo "GKE Cluster deployed successfully!"
 
 # Create DNS Service Account
 # Create a service account that will let your cluster automatically create the DNS records.
@@ -148,6 +150,11 @@ echo "DNS Service Account created."
 # Assign the DNS Admin role to the service account to grant it the required permissions.
 # This will enable automated DNS record management for your Rasa deployment, including SSL certificate automation.
 echo "Assigning roles to DNS Service Account..."
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member="serviceAccount:$NAME-dns@$PROJECT_ID.iam.gserviceaccount.com" \
+  --role="roles/dns.admin" \
+  --condition=None
+  
 gcloud iam service-accounts add-iam-policy-binding $NAME-dns@$PROJECT_ID.iam.gserviceaccount.com \
   --member="serviceAccount:$PROJECT_ID.svc.id.goog[external-dns/external-dns]" \
   --role="roles/iam.workloadIdentityUser"
@@ -185,6 +192,7 @@ echo "Network link: $NETWORK_LINK"
 export PG_VERSION="17"
 # Next, create the PostgreSQL instance itself. Again, we're using the --async flag to allow the command to return immediately and the instance to continue to deploy in the background.
 echo "Creating PostgreSQL instance..."
+echo "Waiting for PostgreSQL instance to be up before continuing. This may take a few minutes..."
 gcloud sql instances create $NAME \
   --database-version=POSTGRES_${PG_VERSION} \
   --region=$REGION \
@@ -202,9 +210,8 @@ gcloud sql instances create $NAME \
   --network=$NETWORK_LINK \
   --enable-google-private-path \
   --maintenance-window-day=SUN \
-  --maintenance-window-hour=1 \
-  --async
-echo "PostgreSQL instance will continue to deploy in the background..."
+  --maintenance-window-hour=1 
+echo "PostgreSQL instance deployed successfully!"
 
 # Create Buckets
 # Create the Cloud Storage buckets that Rasa Pro and Studio will use to save models.
@@ -256,6 +263,7 @@ echo "Service accounts configured."
 # Create a Redis instance that will be used as a Rasa Pro Lock Store. (https://rasa.com/docs/reference/architecture/rasa-pro#lock-store)
 # The Redis instance will be created with a configuration optimized for a small, secure, and efficient caching layer.
 echo "Creating Redis instance..."
+echo "Waiting for Redis instance to be up before continuing. This may take a few minutes..."
 gcloud redis instances create $NAME \
   --region=$REGION \
   --zone=$REGION-a \
@@ -267,9 +275,8 @@ gcloud redis instances create $NAME \
   --redis-version=redis_7_2 \
   --enable-auth \
   --transit-encryption-mode=disabled \
-  --redis-config=activedefrag=yes,maxmemory-gb=0.8 \
-  --async
-echo "Redis instance will continue to deploy in the background..."
+  --redis-config=activedefrag=yes,maxmemory-gb=0.8 
+echo "Redis instance deployed successfully!"
 
 # Create PostgreSQL users and databases
 # Create the databases and users within your PostgreSQL instance so that Rasa Pro and Studio can read and write data.
