@@ -19,3 +19,4 @@ gcp/rasa/ingress/certificate.yaml
 
 gcp/studio/repos/*
 gcp/studio/values.yaml
+gcp/studio/certificate.yaml
