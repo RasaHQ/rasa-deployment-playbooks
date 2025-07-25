@@ -17,7 +17,6 @@ echo "Cert-manager namespace created and labeled for Istio injection!"
 # Install cert-manager using the configuration we've just created into its new namespace:
 echo "Installing cert-manager using the configuration we've just created into its new namespace..."
 helm upgrade --install -n cert-manager cert-manager jetstack/cert-manager -f $SCRIPT_DIR/cert-manager-values.yaml
-echo "Cert-manager installed successfully!"
 
 # Configure cert-manager to issue LetsEncrypt certificates:
 echo "Configuring cert-manager to issue LetsEncrypt certificates..."
