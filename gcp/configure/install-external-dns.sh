@@ -13,9 +13,7 @@ envsubst < $SCRIPT_DIR/external-dns-values.template.yaml > $SCRIPT_DIR/external-
 echo "Creating a new Kubernetes namespace for external-dns..."
 kubectl create ns external-dns
 kubectl label namespace external-dns istio-injection=enabled
-echo "External-DNS namespace created and labeled for Istio injection!"
 
 # Install the external-dns Helm chart:
 echo "Installing the external-dns Helm chart..."
 helm upgrade --install -n external-dns external-dns external-dns/external-dns  -f $SCRIPT_DIR/external-dns-values.yaml
-echo "External-DNS installed successfully!"

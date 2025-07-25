@@ -18,7 +18,6 @@ envsubst < $SCRIPT_DIR/test-ingress-certificate.template.yaml > $SCRIPT_DIR/test
 # Install the httpbin Helm chart:
 echo "Installing the httpbin Helm chart..."
 helm upgrade --install -n httpbin httpbin matheusfm/httpbin -f $SCRIPT_DIR/test-ingress-httpbin-values.yaml
-echo "Httpbin installed successfully!"
 
 # Wait for the certificate to be ready:
 echo "Creating the certificate..."

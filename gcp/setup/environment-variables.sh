@@ -3,21 +3,21 @@
 # You must change the following variables to match your environment
 #--------------------------------
 # Change this to your GCP project ID.
-export PROJECT_ID=gcp-playbook-jm-scripts
+export PROJECT_ID=your-gcp-project-id
 # Change this to the region you want to deploy to. Find the available regions here: https://cloud.google.com/about/locations
 export REGION=us-central1
 # Change this to the domain you want to use for your Rasa installation.
-export DOMAIN=jm2.infra-gcp.rasa-dev.io
+export DOMAIN=yourdomain.example.com
 # Change this to the email address you'll use to request TLS certificates from Let's Encrypt.
-export MY_EMAIL=j.macdonald@rasa.com
+export MY_EMAIL=email@example.com
 # Change this to the name of your company. This will be used to generate unique bucket names.
 export MY_COMPANY_NAME="rasa"
 # The password you'd like to use for the Rasa Pro database.
-export DB_ASSISTANT_PASSWORD="passwordmcpasswordface"
+export DB_ASSISTANT_PASSWORD="your-assistant-db-password"
 # The password you'd like to use for the Rasa Studio database.
-export DB_STUDIO_PASSWORD="passwordmcpasswordface"
+export DB_STUDIO_PASSWORD="your-studio-db-password"
 # The password you'd like to use for the Keycloak database.
-export DB_KEYCLOAK_PASSWORD="passwordmcpasswordface"
+export DB_KEYCLOAK_PASSWORD="your-keycloak-db-password"
 # The license string for Rasa Pro.
 export RASA_PRO_LICENSE="Your Rasa Pro license string here"
 # Your OpenAI API Key.
@@ -27,7 +27,7 @@ export OPENAI_API_KEY="Your OpenAI API Key here"
 # You can optionally change the following environment variables if you have specific requirements
 #--------------------------------
 # Random entropy to help generate unique bucket names and avoid collisions.
-export BUCKET_NAME_ENTROPY="xbucqwerty"
+export BUCKET_NAME_ENTROPY="xbuc"
 # The name of the bucket used to store models for Rasa Pro.
 export MODEL_BUCKET="${MY_COMPANY_NAME}-${BUCKET_NAME_ENTROPY}-${NAME}-model"
 # The name of the bucket used to store models for Rasa Studio.

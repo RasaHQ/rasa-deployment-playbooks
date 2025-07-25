@@ -29,7 +29,6 @@ echo "Creating VPC network..."
 gcloud compute networks create $NAME \
   --bgp-routing-mode=global \
   --subnet-mode=custom
-echo "VPC network created."
 
 # Create subnet
 # This subnet is specifically designed for Kubernetes workloads with separate IP ranges for different types of resources.
@@ -42,7 +41,6 @@ gcloud compute networks subnets create $NAME \
   --region $REGION \
   --secondary-range pods=10.100.0.0/18 \
   --secondary-range services=10.100.64.0/20
-echo "Subnets created."
 
 # Configure Private Service Access
 # This address range is specifically reserved for VPC peering, which allows:
@@ -57,7 +55,6 @@ gcloud compute addresses create $NAME \
   --addresses=10.100.96.0 \
   --prefix-length=19 \
   --network=$NAME
-echo "Private Service Access configured."
 
 # Create the VPC peering connection to enable private connectivity to Google Cloud services.
 # This VPC peering connection now allows your network to:
@@ -70,7 +67,6 @@ gcloud services vpc-peerings connect \
     --service=servicenetworking.googleapis.com \
     --ranges=$NAME \
     --network=$NAME
-echo "VPC Peering enabled."
 
 # Create GKE Service Account
 # A service account is a special type of Google account that allows secure API access without storing credentials in code.
@@ -79,7 +75,6 @@ echo "Creating GCP Service Account..."
 gcloud iam service-accounts create ${NAME}-gke
 # Wait for 30 seconds to ensure the service account is created before trying to assign roles to it.
 sleep 30
-echo "GCP Service Account created."
 
 # Assign all the required permissions to this service account for things like logging or pulling container images.
 # All IAM roles are now assigned to the GKE service account for Monitoring & Observability:
@@ -113,7 +108,6 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
   --member="serviceAccount:$NAME-gke@$PROJECT_ID.iam.gserviceaccount.com" \
   --role="roles/containerregistry.ServiceAgent" \
   --condition=None
-echo "Roles assigned to GCP Service Account."
 
 # Create GKE Cluster
 # Create the Google Kubernetes Engine cluster where your Rasa Pro and Studio instances will be deployed.
@@ -139,13 +133,11 @@ gcloud container clusters create $NAME \
   --tags=$NAME \
   --workload-metadata=GKE_METADATA \
   --workload-pool=$PROJECT_ID.svc.id.goog 
-echo "GKE Cluster deployed successfully!"
 
 # Create DNS Service Account
 # Create a service account that will let your cluster automatically create the DNS records.
 echo "Creating DNS Service Account..."
 gcloud iam service-accounts create $NAME-dns
-echo "DNS Service Account created."
 
 # Assign the DNS Admin role to the service account to grant it the required permissions.
 # This will enable automated DNS record management for your Rasa deployment, including SSL certificate automation.
@@ -162,7 +154,6 @@ gcloud iam service-accounts add-iam-policy-binding $NAME-dns@$PROJECT_ID.iam.gse
 gcloud iam service-accounts add-iam-policy-binding $NAME-dns@$PROJECT_ID.iam.gserviceaccount.com \
   --member="serviceAccount:$PROJECT_ID.svc.id.goog[cert-manager/cert-manager]" \
   --role="roles/iam.workloadIdentityUser"
-echo "Roles assigned to DNS Service Account."
 
 # Create Rasa Service Accounts
 # Create the service account that Rasa Pro and Rasa Studio will use to interact with GCP resources, like reading and writing models from your storage buckets.
@@ -180,7 +171,6 @@ gcloud iam service-accounts create $NAME-studio
 gcloud iam service-accounts add-iam-policy-binding $NAME-studio@$PROJECT_ID.iam.gserviceaccount.com \
   --member="serviceAccount:$PROJECT_ID.svc.id.goog[rasa-studio/$NAMESPACE]" \
   --role="roles/iam.workloadIdentityUser"
-echo "Rasa Studio Service Account created and configured"
 
 # Create PostgreSQL instance
 # Create the PostgreSQL instance that Rasa Pro and Studio will use to persist data.
@@ -211,7 +201,6 @@ gcloud sql instances create $NAME \
   --enable-google-private-path \
   --maintenance-window-day=SUN \
   --maintenance-window-hour=1 
-echo "PostgreSQL instance deployed successfully!"
 
 # Create Buckets
 # Create the Cloud Storage buckets that Rasa Pro and Studio will use to save models.
@@ -257,7 +246,6 @@ gcloud storage buckets add-iam-policy-binding gs://$STUDIO_BUCKET \
   --member="serviceAccount:$NAME-studio@$PROJECT_ID.iam.gserviceaccount.com" \
   --role=roles/storage.objectAdmin \
   --condition=None
-echo "Service accounts configured."
 
 # Create Redis
 # Create a Redis instance that will be used as a Rasa Pro Lock Store. (https://rasa.com/docs/reference/architecture/rasa-pro#lock-store)
@@ -276,7 +264,6 @@ gcloud redis instances create $NAME \
   --enable-auth \
   --transit-encryption-mode=disabled \
   --redis-config=activedefrag=yes,maxmemory-gb=0.8 
-echo "Redis instance deployed successfully!"
 
 # Create PostgreSQL users and databases
 # Create the databases and users within your PostgreSQL instance so that Rasa Pro and Studio can read and write data.
@@ -291,4 +278,4 @@ gcloud sql databases create $DB_KEYCLOAK_DATABASE --instance=$NAME
 gcloud sql users create $DB_KEYCLOAK_USERNAME --instance=$NAME --password=$DB_KEYCLOAK_PASSWORD
 echo "PostgreSQL users and databases created."
 
-echo "Infrastructure deployed successfully!"
+echo "Infrastructure deployed! Check the output above for any errors."

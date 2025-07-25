@@ -17,19 +17,15 @@ kubectl get ns
 # Configure certificate 
 echo "Configuring certificate..."
 envsubst < $SCRIPT_DIR/certificate.template.yaml > $SCRIPT_DIR/certificate.yaml
-echo "Certificate configured successfully!"
 
 echo "Deploying certificate..."
 kubectl apply -f $SCRIPT_DIR/certificate.yaml
-echo "Certificate deployed successfully!"
 
 # Configure ingress
 echo "Configuring ingress..."
 envsubst < $SCRIPT_DIR/ingress.template.yaml > $SCRIPT_DIR/ingress.yaml
-echo "Ingress configured successfully!"
 
 echo "Deploying ingress..."
 kubectl apply -f $SCRIPT_DIR/ingress.yaml
-echo "Ingress deployed successfully!"
 
 echo "You should now be able to access the Rasa assistant at https://assistant.$DOMAIN. It may take a few minutes for the certificate to issue and be fully available."

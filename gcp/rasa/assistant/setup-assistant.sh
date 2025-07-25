@@ -18,7 +18,6 @@ kubectl get ns
 echo "Pulling Rasa Helm chart..."
 mkdir $SCRIPT_DIR/repos
 helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.2.5 --untar --destination $SCRIPT_DIR/repos/rasa-helm
-echo "Rasa Helm chart pulled successfully!"
 
 # Next, we'll ensure that other passwords and secret values that Rasa requires are set, before creating a Kubernetes Secret to securely store them in a way that we can reference later on:
 echo "Creating secrets for the Rasa assistant to use..."
@@ -49,4 +48,3 @@ create secret generic rasa-secrets \
 --from-literal=kafkaSslPassword="$(echo $KAFKA_CLIENT_PASSWORD)" \
 --from-literal=redisPassword="$(echo $REDIS_PASSWORD)" \
 --from-literal=dbPassword="$(echo $DB_PASSWORD)"
-echo "Kubernetes secret created successfully!"
