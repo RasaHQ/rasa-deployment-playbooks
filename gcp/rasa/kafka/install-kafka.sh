@@ -27,6 +27,7 @@ echo "Kafka configuration file generated successfully!"
 
 # We'll fetch the automatically generated password from the previous step, and then use it to create a couple of configuration files locally that act as configuration for Rasa to be able to connect to Kafka
 echo "Installing Kafka to the cluster..."
+helm repo add bitnami https://charts.bitnami.com/bitnami
 helm uninstall kafka -n $NAMESPACE
 helm upgrade --install -n $NAMESPACE kafka bitnami/kafka -f $SCRIPT_DIR/kafka.yaml --version 32.3.2
 echo "Kafka installed successfully!"
