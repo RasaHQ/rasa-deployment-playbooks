@@ -1,6 +1,6 @@
 echo "Enabling required services on GCP. This might take a few minutes..."
 # GCP requires that you enable the services you wish to use in each project before you can deploy infrastructure.
-# You'll need to enable the following APIs & Services by logging into the Google Cloud Web UI and ensuring you're in the correct project:
+# We'll attempt to enable the following services:
 # - Compute Engine API (https://console.cloud.google.com/apis/library/compute.googleapis.com), for creating the virtual network.
 # - Service Networking API (https://console.cloud.google.com/apis/library/servicenetworking.googleapis.com), to allow us to automatically manage networking.
 # - Kubernetes Engine API (https://console.developers.google.com/apis/api/container.googleapis.com), to allow us to deploy a Google Kubernetes Engine (GKE) cluster.
