@@ -19,7 +19,7 @@ gcp/studio/repos/*
 gcp/studio/values.yaml
 gcp/studio/certificate.yaml
 
-
+aws/deploy/main.tf
 aws/configure/cert-manager-certificate-issuer.yaml
 aws/configure/cert-manager-values.yaml
 aws/configure/external-dns-values.yaml
@@ -35,3 +35,6 @@ aws/rasa/ingress/certificate.yaml
 aws/studio/repos/*
 aws/studio/values.yaml
 aws/studio/certificate.yaml
+
+# Dev
+aws/setup/environment-variable-dev.sh

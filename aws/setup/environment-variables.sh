@@ -1,11 +1,14 @@
-# Environment variables for GCP deployment
+# Environment variables for AWS deployment
 
 # You must change the following variables to match your environment
 #--------------------------------
-# Change this to your GCP project ID.
-export PROJECT_ID=your-gcp-project-id
-# Change this to the region you want to deploy to. Find the available regions here: https://cloud.google.com/about/locations
-export REGION=us-central1
+# Set the value of this to terrarform if you've chosen to use Terraform for deployment or tofu if you've chosen to use OpenTofu for deployment.
+export TF_COMMAND=tofu
+# Change this to the name of the AWS profile you want to use which you have configured in your ~/.aws/config file.
+export AWS_PROFILE=your-aws-profile-name
+# Change this to the AWS region you want to deploy to. Find the available regions here: https://docs.aws.amazon.com/global-infrastructure/latest/regions/aws-regions.html
+export AWS_REGION=us-east-1
+export REGION=$AWS_REGION
 # Change this to the domain you want to use for your Rasa installation.
 # When you complete the playbook, you will be able to access the Rasa Pro assistant at https://assistant.yourdomain.example.com
 # and the Rasa Studio at https://studio.yourdomain.example.com
@@ -20,6 +23,8 @@ export DB_ASSISTANT_PASSWORD="your-assistant-db-password"
 export DB_STUDIO_PASSWORD="your-studio-db-password"
 # The password you'd like to use for the Keycloak database.
 export DB_KEYCLOAK_PASSWORD="your-keycloak-db-password"
+# The authentication string you'd like to use for Redis. This must be 16 to 128 alphanumeric characters.
+export REDIS_AUTH="changemechangeme123"
 # The license string for Rasa Pro.
 export RASA_PRO_LICENSE="Your Rasa Pro license string here"
 # Your OpenAI API Key.
@@ -36,7 +41,7 @@ export BUCKET_NAME_ENTROPY="xbuc"
 export MODEL_BUCKET="${MY_COMPANY_NAME}-${BUCKET_NAME_ENTROPY}-${NAME}-model"
 # The name of the bucket used to store models for Rasa Studio.
 export STUDIO_BUCKET="${MY_COMPANY_NAME}-${BUCKET_NAME_ENTROPY}-${NAME}-studio"
-# Process your domain name to create a DNS zone name for GCP Cloud DNS.
+# Process your domain name to create a DNS zone name for Amazon Route 53.
 export DNS_ZONE=$(echo "$DOMAIN" | sed -e 's/\./-/g')
 # The Kubernetes namespace that will be used for the deployment.
 export NAMESPACE=rasa
@@ -54,16 +59,33 @@ export DB_KEYCLOAK_DATABASE="keycloak"
 export DB_KEYCLOAK_USERNAME="keycloak"
 # The version of PostgreSQL Container to use for applying some configuration to the database.
 export PG_VERSION=17
-# The name of the GCP service account for the Rasa Pro assistant.
-export SERVICE_ACCOUNT_ASSISTANT="${NAME}-assistant@${PROJECT_ID}.iam.gserviceaccount.com"
-# The name of the GCP service account for Studio.
-export SERVICE_ACCOUNT_STUDIO="${NAME}-studio@${PROJECT_ID}.iam.gserviceaccount.com"
 #--------------------------------
 
+# You almost certainly don't need to change the following environment variables which define the network architecture of the deployment.
+# Only change them if you have specific requirements.
+# These won't be printed out when you run the script.
+#--------------------------------
+export CIDR_ALL=10.100.0.0/17
+
+export CIDR_PUBLIC_A=10.100.4.0/22
+export CIDR_PRIVATE_A=10.100.8.0/21
+export CIDR_DB_A=10.100.16.0/21
+export CIDR_ELASTICACHE_A=10.100.24.0/21
+
+export CIDR_PUBLIC_B=10.100.36.0/22
+export CIDR_PRIVATE_B=10.100.40.0/21
+export CIDR_DB_B=10.100.48.0/21
+export CIDR_ELASTICACHE_B=10.100.56.0/21
+
+export CIDR_PUBLIC_C=10.100.68.0/22
+export CIDR_PRIVATE_C=10.100.72.0/21
+export CIDR_DB_C=10.100.80.0/21
+export CIDR_ELASTICACHE_C=10.100.88.0/21
+#--------------------------------
 
 # Print the environment variables so you can see they're all set correctly.
-echo "GCP Project:            $PROJECT_ID"
-echo "GCP region:             $REGION"
+echo "AWS Profile:            $AWS_PROFILE"
+echo "AWS Region:             $AWS_REGION"
 echo "Domain:                 $DOMAIN"
 echo "Let's Encrypt email:     $MY_EMAIL"
 echo "Company name:           $MY_COMPANY_NAME"
@@ -85,7 +107,5 @@ echo "DB studio username:     $DB_STUDIO_USERNAME"
 echo "DB keycloak database:  $DB_KEYCLOAK_DATABASE"
 echo "DB keycloak username:  $DB_KEYCLOAK_USERNAME"
 echo "PostgreSQL version:     $PG_VERSION"
-echo "Service account assistant: $SERVICE_ACCOUNT_ASSISTANT"
-echo "Service account studio:    $SERVICE_ACCOUNT_STUDIO"
 echo "--------------------------------"
 echo "If any of the above values are incorrect or blank, please update the file and re-run.

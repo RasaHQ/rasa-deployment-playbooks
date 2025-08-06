@@ -1,0 +1,558 @@
+variable "region" {
+  default = "$REGION"
+}
+
+# Check if these zones are available in the defined region!
+variable "zones" {
+  default = ["${REGION}b", "${REGION}c", "${REGION}d"]
+}
+
+variable "vpc_cidr" {
+  default = "${CIDR_ALL}"
+}
+
+variable "public_subnets" {
+  default = ["${CIDR_PUBLIC_A}", "${CIDR_PUBLIC_B}", "${CIDR_PUBLIC_C}"]
+}
+
+variable "private_subnets" {
+  default = ["${CIDR_PRIVATE_A}", "${CIDR_PRIVATE_B}", "${CIDR_PRIVATE_C}"]
+}
+
+variable "db_subnets" {
+  default = ["${CIDR_DB_A}", "${CIDR_DB_B}", "${CIDR_DB_C}"]
+}
+
+variable "elasticache_subnets" {
+  default = ["$CIDR_ELASTICACHE_A", "$CIDR_ELASTICACHE_B", "$CIDR_ELASTICACHE_C"]
+}
+
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = "${REGION}"
+  profile = "${AWS_PROFILE}"
+}
+
+# get current user identity
+data "aws_caller_identity" "current" {}
+
+# create EKS access role
+resource "aws_iam_role" "eks_access" {
+  name = "EksAccess${NAME}"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          AWS = "arn:aws:iam::\${data.aws_caller_identity.current.account_id}:root"
+        }
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+
+  tags = {
+    Name = "EksAccess"
+  }
+}
+
+
+# VPC Network =========================================
+
+# Create VPC Network, Subnets, Internet gateway, NAT gateways, Routing tables and Routes
+module "vpc" {
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "~> 5.0"
+
+  name = "${NAME}"
+
+  cidr = "${CIDR_ALL}"
+  azs = var.zones
+  private_subnets = var.private_subnets
+  public_subnets = var.public_subnets
+  elasticache_subnets = var.elasticache_subnets
+  database_subnets = var.db_subnets
+
+  # set to true if you want public access to db
+  create_database_subnet_route_table     = true
+  # set to true if you want public access to db
+  create_database_internet_gateway_route = false
+
+  enable_nat_gateway   = true
+  single_nat_gateway   = false
+
+  public_subnet_tags = {
+    "kubernetes.io/cluster/${NAME}" = "shared"
+    "kubernetes.io/role/elb"                      = 1
+  }
+
+  private_subnet_tags = {
+    "kubernetes.io/cluster/${NAME}" = "shared"
+    "kubernetes.io/role/internal-elb"             = 1
+  }
+}
+
+
+# Kubernetes cluster EKS =========================================
+
+module "eks" {
+  source  = "terraform-aws-modules/eks/aws"
+  version = "~> 20.37"
+
+  cluster_name    = "${NAME}"
+  cluster_version = "1.33"
+
+  vpc_id                         = module.vpc.vpc_id
+  subnet_ids                     = module.vpc.private_subnets
+  cluster_endpoint_public_access = true
+  enable_cluster_creator_admin_permissions = true
+  
+  iam_role_additional_policies = {
+    AmazonEC2ContainerRegistryReadOnly = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+    CloudWatchLogsFullAccess           = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
+    CloudWatchAgentServerPolicy        = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+    AWSXrayWriteOnlyAccess             = "arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess"
+  }
+
+  #  EKS K8s API cluster needs to be able to talk with the EKS worker nodes with port 15017/TCP and 15012/TCP which is used by Istio.
+  #  Istio in order to create sidecar needs to be able to communicate with webhook and for that network passage to EKS is needed.
+  node_security_group_additional_rules = {
+    ingress_15017 = {
+      description                   = "Cluster API - Istio Webhook namespace.sidecar-injector.istio.io"
+      protocol                      = "TCP"
+      from_port                     = 15017
+      to_port                       = 15017
+      type                          = "ingress"
+      source_cluster_security_group = true
+    }
+    ingress_15012 = {
+      description                   = "Cluster API to nodes ports/protocols"
+      protocol                      = "TCP"
+      from_port                     = 15012
+      to_port                       = 15012
+      type                          = "ingress"
+      source_cluster_security_group = true
+    }
+  }
+
+  eks_managed_node_groups = {
+    green = {
+      name           = "node-group-green"
+      ami_type       = "AL2023_x86_64_STANDARD"
+      instance_types = ["m6i.xlarge"]
+      labels         = {}
+
+      min_size     = 1
+      max_size     = 3
+      desired_size = 2
+    }
+  }
+
+  cluster_addons = {
+    coredns                = { most_recent = true }
+    eks-pod-identity-agent = {
+      most_recent = true
+      before_compute = true
+    }
+    amazon-cloudwatch-observability = {
+      most_recent = true
+    }
+  }
+
+  access_entries = {
+    common = {
+      type          = "STANDARD"
+      principal_arn = aws_iam_role.eks_access.arn
+      policy_associations = {
+        single = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        }
+      }
+    }
+  }
+
+  cluster_tags = {
+    Name = "${NAME}"
+  }
+}
+
+data "aws_iam_policy" "ebs_csi_policy" {
+  arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+}
+
+module "irsa-ebs-csi" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
+  version = "5.38.0"
+
+  create_role                   = true
+  role_name                     = "AmazonEKSTFEBSCSIRole-\${module.eks.cluster_name}"
+  provider_url                  = module.eks.oidc_provider
+  role_policy_arns              = [data.aws_iam_policy.ebs_csi_policy.arn]
+  oidc_fully_qualified_subjects = ["system:serviceaccount:kube-system:ebs-csi-controller-sa"]
+}
+
+resource "aws_eks_addon" "ebs-csi" {
+  cluster_name             = module.eks.cluster_name
+  addon_name               = "aws-ebs-csi-driver"
+  addon_version            = "v1.46.0-eksbuild.1"
+  service_account_role_arn = module.irsa-ebs-csi.iam_role_arn
+  tags = {
+    "eks_addon" = "ebs-csi"
+  }
+}
+
+
+# DNS Zone =========================================
+
+resource "aws_route53_zone" "dns_zone" {
+  name = "${DOMAIN}"
+  comment = "${DOMAIN} (Rasa)"
+}
+
+output "domain" {
+  value = aws_route53_zone.dns_zone.name
+}
+
+output "dns_name_servers" {
+  value = aws_route53_zone.dns_zone.name_servers
+}
+
+
+
+# S3 Buckets =========================================
+
+module "model_bucket" {
+  source  = "terraform-aws-modules/s3-bucket/aws"
+  version = "~> 4.11"
+
+  bucket = "${MODEL_BUCKET}"
+
+  control_object_ownership = true
+  object_ownership         = "BucketOwnerPreferred"
+  expected_bucket_owner    = data.aws_caller_identity.current.account_id
+
+  acl = "private"
+}
+
+module "studio_bucket" {
+  source  = "terraform-aws-modules/s3-bucket/aws"
+  version = "~> 4.11"
+
+  bucket = "${STUDIO_BUCKET}"
+
+  control_object_ownership = true
+  object_ownership         = "BucketOwnerPreferred"
+  expected_bucket_owner    = data.aws_caller_identity.current.account_id
+
+  acl = "private"
+}
+
+
+
+# PostgreSQL RDS =========================================
+
+
+module "rds_security_group" {
+  source  = "terraform-aws-modules/security-group/aws"
+  version = "~> 5.0"
+
+  name        = "${NAME}-rds"
+  description = "Rasa ${NAME} RDS PostgreSQL security group"
+  vpc_id      = module.vpc.vpc_id
+
+  # ingress
+  ingress_with_cidr_blocks = [
+    {
+      from_port   = 5432
+      to_port     = 5432
+      protocol    = "tcp"
+      description = "PostgreSQL access from within VPC"
+      cidr_blocks = module.vpc.vpc_cidr_block
+    },
+  ]
+
+  tags = {
+    Name = "${NAME}-rds"
+  }
+}
+
+module "rds_main" {
+  source  = "terraform-aws-modules/rds/aws"
+  version = "~> 6.12"
+
+  identifier = "${NAME}"
+
+  engine               = "postgres"
+  engine_version       = "17.4"
+  family               = "postgres17"
+  major_engine_version = "17"
+
+  instance_class       = "db.t4g.large"
+
+  allocated_storage     = 40
+  max_allocated_storage = 100
+
+  port     = 5432
+  username = "postgres"
+  db_name = "default_db"
+
+  manage_master_user_password   = true
+  master_user_password_rotate_immediately           = false
+  master_user_password_rotation_schedule_expression = "rate(15 days)"
+
+  multi_az               = true
+
+  db_subnet_group_name = module.vpc.database_subnet_group_name
+  vpc_security_group_ids = [module.rds_security_group.security_group_id]
+
+  maintenance_window              = "Sun:00:00-Sun:03:00"
+  backup_window                   = "03:00-06:00"
+  enabled_cloudwatch_logs_exports = ["postgresql", "upgrade"]
+  create_cloudwatch_log_group     = true
+
+  backup_retention_period = 7
+  skip_final_snapshot     = true
+  deletion_protection     = false
+
+  performance_insights_enabled          = true
+  performance_insights_retention_period = 7
+  create_monitoring_role                = true
+  monitoring_interval                   = 60
+  monitoring_role_name                  = "rasa-${NAME}-rds-monitoring"
+  monitoring_role_use_name_prefix       = true
+  monitoring_role_description           = "Rasa ${NAME} RDS monitoring role"
+
+  parameters = [
+    {
+      name  = "autovacuum"
+      value = 1
+    },
+    {
+      name  = "client_encoding"
+      value = "utf8"
+    }
+  ]
+
+}
+
+output "secret_id_db" {
+  value = module.rds_main.db_instance_master_user_secret_arn
+}
+
+output "db_host" {
+  value = module.rds_main.db_instance_endpoint
+}
+
+output "db_port" {
+  value = module.rds_main.db_instance_port
+}
+
+
+# Redis Elasticache =========================================
+
+
+locals {
+  elasticache_id = "rasa-${NAME}-redis"
+}
+
+resource "aws_elasticache_parameter_group" "default" {
+  name   = "\${local.elasticache_id}-params"
+  family = "redis7"
+
+  parameter {
+    name  = "activedefrag"
+    value = "yes"
+  }
+
+  parameter {
+    name  = "maxmemory-policy"
+    value = "volatile-lru"
+  }
+}
+
+
+module "elasticache_security_group" {
+  source  = "terraform-aws-modules/security-group/aws"
+  version = "~> 5.3"
+
+  name        = "rasa-${NAME}-elasticache-main"
+  description = "Security group for Elasticache ${NAME}"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress_cidr_blocks = module.vpc.private_subnets_cidr_blocks
+  ingress_rules       = ["redis-tcp"]
+
+  egress_cidr_blocks = [module.vpc.vpc_cidr_block]
+  egress_rules       = ["all-all"]
+
+  tags = {
+    Name = "rasa-${NAME}-elasticache-main"
+  }
+}
+
+resource "aws_elasticache_replication_group" "group1" {
+  automatic_failover_enabled  = true
+  multi_az_enabled            = true
+  preferred_cache_cluster_azs = slice(var.zones, 0, 2)
+  replication_group_id        = "\${local.elasticache_id}-group1"
+  description                 = "Rasa ${NAME} Redis Elasticache group 1"
+  node_type                   = "cache.m5.xlarge"
+  num_cache_clusters          = 2
+
+  parameter_group_name        = aws_elasticache_parameter_group.default.name
+  engine                      = "redis"
+  engine_version              = "7.1"
+  port                        = 6379
+
+  subnet_group_name = module.vpc.elasticache_subnet_group_name
+
+  transit_encryption_enabled = true
+  auth_token                 = "${REDIS_AUTH}"
+  auth_token_update_strategy = "SET"
+
+  network_type = "ipv4"
+  security_group_ids = [module.elasticache_security_group.security_group_id]
+}
+
+output "elasticache_primary_endpoint" {
+  value = aws_elasticache_replication_group.group1.primary_endpoint_address
+}
+
+
+
+# DNS Identity =========================================
+
+module "iam_role_dns" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "~> 5.59"
+
+  role_name = "${NAME}-dns"
+
+  attach_cert_manager_policy = true
+  attach_external_dns_policy = true
+
+  oidc_providers = {
+    rasa = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["cert-manager:cert-manager", "external-dns:external-dns"]
+    }
+  }
+}
+
+locals {
+  service_account_dns = "arn:aws:iam::\${data.aws_caller_identity.current.account_id}:role/\${module.iam_role_dns.iam_role_name}"
+}
+
+output "service_account_dns" {
+  value = local.service_account_dns
+}
+
+
+# Rasa Assistent Identity =========================================
+
+resource "aws_iam_policy" "assistant" {
+  name        = "${NAME}_bucket_assistant"
+  path        = "/"
+  description = "Rasa ${NAME} bucket assistant"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        "Action": "s3:*",
+        Effect   = "Allow"
+        Resource = [
+          "arn:aws:s3:::\${module.model_bucket.s3_bucket_id}",
+          "arn:aws:s3:::\${module.model_bucket.s3_bucket_id}/*"
+        ]
+      },
+    ]
+  })
+}
+
+module "iam_role_assistant" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "~> 5.59"
+
+  role_name = "${NAME}-assistant"
+
+  role_policy_arns = {
+    policy = aws_iam_policy.assistant.arn
+  }
+  
+  oidc_providers = {
+    rasa = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["${NAMESPACE}:rasa-assistant"]
+    }
+  }
+}
+
+locals {
+  service_account_assistant = "arn:aws:iam::\${data.aws_caller_identity.current.account_id}:role/\${module.iam_role_assistant.iam_role_name}"
+}
+
+output "service_account_assistant" {
+  value = local.service_account_assistant
+}
+
+
+# Rasa Studio Identity =========================================
+
+resource "aws_iam_policy" "studio" {
+  name        = "${NAME}_bucket_studio"
+  path        = "/"
+  description = "Rasa ${NAME} bucket studio"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        "Action": "s3:*",
+        Effect   = "Allow"
+        Resource = [
+          "arn:aws:s3:::\${module.studio_bucket.s3_bucket_id}",
+          "arn:aws:s3:::\${module.studio_bucket.s3_bucket_id}/*"
+        ]
+      },
+    ]
+  })
+}
+
+module "iam_role_studio" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "~> 5.59"
+
+  role_name = "${NAME}-studio"
+
+  role_policy_arns = {
+    policy = aws_iam_policy.studio.arn
+  }
+  
+  oidc_providers = {
+    rasa = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["${NAMESPACE}:rasa-studio"]
+    }
+  }
+}
+
+locals {
+  service_account_studio = "arn:aws:iam::\${data.aws_caller_identity.current.account_id}:role/\${module.iam_role_studio.iam_role_name}"
+}
+
+output "service_account_studio" {
+  value = local.service_account_studio
+}
