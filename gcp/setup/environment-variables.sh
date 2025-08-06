@@ -88,4 +88,4 @@ echo "PostgreSQL version:     $PG_VERSION"
 echo "Service account assistant: $SERVICE_ACCOUNT_ASSISTANT"
 echo "Service account studio:    $SERVICE_ACCOUNT_STUDIO"
 echo "--------------------------------"
-echo "If any of the above values are incorrect or blank, please update the file and re-run.
+echo "If any of the above values are incorrect or blank, please update the file and re-run."
