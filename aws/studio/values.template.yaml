@@ -1,0 +1,96 @@
+config:
+  # -- Defines the host name for all the Studio ingress resources. Make sure you provide a valid host name.
+  ingressHost: &dns_hostname "studio.${DOMAIN}"
+  ingressAnnotations:
+    kubernetes.io/ingress.class: istio
+  ingressClassName: istio
+  # -- Define if you will be using https or http with the ingressHost
+  connectionType: "https"
+  # -- The postgres database instance details for Studio to connect to.
+  database:
+    # -- The database host name
+    host: ${DB_HOST}
+    # -- The database port
+    port: "5432"
+    # -- The database username
+    username: "${DB_STUDIO_USERNAME}"
+    # -- The database password
+    password:
+      secretName: "studio-secrets"
+      secretKey: "DATABASE_PASSWORD"
+backend:
+  serviceAccount:
+    # -- serviceAccount.create specifies whether a service account should be created
+    create: true
+    # -- serviceAccount.annotations defines annotations to add to the service account
+    annotations:
+      iam.gke.io/gcp-service-account: ${SERVICE_ACCOUNT_STUDIO}
+    name: "studio-backend"
+  # -- Configure the ingress resource that allows you to access the deployment installation.
+  ## ref: http://kubernetes.io/docs/user-guide/ingress/
+  ingress:
+    # -- ingress.tls spefices the TLS configuration for ingress
+    tls:
+      - secretName: ${NAME}-studio-tls
+        hosts:
+          - studio.${DOMAIN}
+eventIngestion:
+  environmentVariables:
+    KAFKA_BROKER_ADDRESS: 
+      value: kafka.${NAMESPACE}.svc.cluster.local:9092
+    KAFKA_SASL_MECHANISM:
+      value: plain
+    KAFKA_SASL_USERNAME:
+      value: kafka
+    KAFKA_TOPIC:
+      value: rasa
+    KAFKA_GROUP_ID:
+      value: studio
+web-client:
+  serviceAccount:
+    # -- serviceAccount.create specifies whether a service account should be created
+    create: true
+    # -- serviceAccount.annotations defines annotations to add to the service account
+    annotations:
+      iam.gke.io/gcp-service-account: ${SERVICE_ACCOUNT_STUDIO}
+    name: "studio-webclient"
+  ingress:
+    # -- ingress.tls spefices the TLS configuration for ingress
+    tls:
+      - secretName: ${NAME}-studio-tls
+        hosts:
+          - studio.${DOMAIN}
+keycloak:
+  ingress:
+    # -- ingress.tls spefices the TLS configuration for ingress
+    tls:
+      - secretName: ${NAME}-studio-tls
+        hosts:
+          - studio.${DOMAIN}
+  serviceAccount:
+    # -- serviceAccount.create specifies whether a service account should be created
+    create: true
+    # -- serviceAccount.annotations defines annotations to add to the service account
+    annotations:
+      iam.gke.io/gcp-service-account: ${SERVICE_ACCOUNT_STUDIO}
+    # -- serviceAccount.name defines the name of the service account to use.
+    name: "studio-keycloak"
+rasa:
+  rasa:
+    additionalEnv:
+      - name: RASA_REMOTE_STORAGE
+        value: gcs
+      - name: BUCKET_NAME
+        value: ${STUDIO_BUCKET}
+    ingress:
+      className: istio
+      hosts:
+        # -- Please update the below URL with the correct host name of the Studio deployment
+        - host: *dns_hostname
+          paths:
+            - path: /talk
+              pathType: Prefix
+      tls:
+        - secretName: ${NAME}-studio-tls
+          hosts:
+            - studio.${DOMAIN}
