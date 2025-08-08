@@ -23,7 +23,7 @@ helm upgrade --install -n httpbin httpbin matheusfm/httpbin -f $SCRIPT_DIR/test-
 echo "Creating the certificate..."
 kubectl apply -f $SCRIPT_DIR/test-ingress-certificate.yaml
 echo "Waiting for the certificate to be ready for use..."
-kubectl wait -n istio-system --for=condition=Ready=true certificate/httpbin --timeout=60s
+kubectl wait -n istio-system --for=condition=Ready=true certificate/httpbin --timeout=120s
 
 # Test the ingress:
 echo "Testing the ingress..."

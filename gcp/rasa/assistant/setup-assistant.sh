@@ -1,3 +1,5 @@
+set -e 
+
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -35,9 +37,6 @@ echo "DB_PASSWORD: $DB_PASSWORD"
 echo "REDIS_PASSWORD: $REDIS_AUTH"
 echo "KAFKA_CLIENT_PASSWORD: $KAFKA_CLIENT_PASSWORD"
 echo "RASA_PRO_LICENSE: $RASA_PRO_LICENSE"
-
-echo "Checking if a secret already exists..."
-kubectl delete secret rasa-secrets -n $NAMESPACE
 
 echo "Creating a Kubernetes secret for these values..."
 kubectl --namespace $NAMESPACE \
