@@ -23,6 +23,7 @@ aws/deploy/main.tf
 aws/deploy/.terraform/*
 aws/deploy/.terraform.lock.hcl
 aws/deploy/terraform.tfstate
+aws/deploy/terraform.tfstate.backup
 aws/configure/cert-manager-certificate-issuer.yaml
 aws/configure/cert-manager-values.yaml
 aws/configure/external-dns-values.yaml
