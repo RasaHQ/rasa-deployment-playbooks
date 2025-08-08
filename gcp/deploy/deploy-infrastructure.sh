@@ -1,3 +1,5 @@
+set -e
+
 echo "Enabling required services on GCP. This might take a few minutes..."
 # GCP requires that you enable the services you wish to use in each project before you can deploy infrastructure.
 # We'll attempt to enable the following services:
