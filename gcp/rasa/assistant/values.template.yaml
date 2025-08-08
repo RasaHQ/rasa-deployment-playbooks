@@ -29,14 +29,14 @@ rasa:
         url: ${DB_HOST}
         db: ${DB_ASSISTANT_DATABASE}
         username: ${DB_ASSISTANT_USERNAME}
-        password: ${DB_ASSISTANT_PASSWORD}
+        password: ${DB_PWD}
         port: 5432
       # Configure the assistant to use Redis as the Rasa Lock Store.
       # This is needed when you have a high-load scenario that requires the Rasa server to be replicated across multiple instances. It ensures that even with multiple servers, the messages for each conversation are handled in the correct sequence without any loss or overlap.
       lockStore:
         enabled: true
         type: concurrent_redis
-        password: ${REDIS_PASSWORD}
+        password: ${REDIS_PWD}
         port: 6379
         url: ${REDIS_HOST}
         use_ssl: false
@@ -72,7 +72,7 @@ rasa:
       value: ${DB_ASSISTANT_DATABASE}
     - name: DB_USER
       value: assistant
-    - name: DB_PASSWORD
+    - name: DB_PWD
       valueFrom:
         secretKeyRef:
           name: rasa-secrets
@@ -84,7 +84,7 @@ rasa:
           key: kafkaSslPassword
     - name: KAFKA_USER
       value: kafka
-    - name: REDIS_PASSWORD
+    - name: REDIS_PWD
       valueFrom:
         secretKeyRef:
           name: rasa-secrets
