@@ -31,9 +31,6 @@ $ISTIO version
 echo "Installing Istio on your cluster..."
 $ISTIO install --set profile=demo --skip-confirmation -f "$SCRIPT_DIR/istio-operator.yaml"
 
-echo "Creating the Istio Operator on your cluster..."
-# kubectl apply -f "$SCRIPT_DIR/istio-operator.yaml"
-
 # Here we'll create an Ingress Class that will help us handle network traffic coming inbound to the Rasa products.
 echo "Creating the Istio Ingress Class on your cluster..."
 kubectl apply -f "$SCRIPT_DIR/istio-ingress-class.yaml"
