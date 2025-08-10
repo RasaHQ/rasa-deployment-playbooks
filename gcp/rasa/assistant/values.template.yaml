@@ -19,6 +19,17 @@ rasa:
           user_message_evt: user_uttered
         rest: { }
     endpoints:
+      modelGroups:
+      - id: openai-gpt-4o
+        models:
+        - max_tokens: 256
+          model: gpt-4o-2024-11-20
+          provider: openai
+          request_timeout: 7
+      - id: openai-embeddings
+        models:
+        - model: text-embedding-3-small
+          provider: openai
       models:
         enabled: false
       # Configure the assistant to use our PostgreSQL instance as the Tracker Store, which records the assistant's conversations.
@@ -29,7 +40,7 @@ rasa:
         url: ${DB_HOST}
         db: ${DB_ASSISTANT_DATABASE}
         username: ${DB_ASSISTANT_USERNAME}
-        password: ${DB_ASSISTANT_PASSWORD}
+        password: ${DB_PASSWORD}
         port: 5432
       # Configure the assistant to use Redis as the Rasa Lock Store.
       # This is needed when you have a high-load scenario that requires the Rasa server to be replicated across multiple instances. It ensures that even with multiple servers, the messages for each conversation are handled in the correct sequence without any loss or overlap.
@@ -48,12 +59,9 @@ rasa:
         security_protocol: SASL_PLAINTEXT
         sasl_mechanism: PLAIN
         topic: rasa
-        url: kafka-controller-0.kafka-headless.${NAMESPACE}.svc.cluster.local:9092,kafka-controller-1.kafka-headless.${NAMESPACE}.svc.cluster.local:9092,kafka-controller-2.kafka-headless.${NAMESPACE}.svc.cluster.local:9092
+        url: kafka-controller-headless.rasa.svc.cluster.local:9092
         sasl_username: ${KAFKA_USER}
-        sasl_password: 
-          secretKeyRef:
-            name: rasa-secrets
-            key: kafkaSslPassword
+        sasl_password: ${KAFKA_PASSWORD}
         ssl_check_hostname: false
   # We'll configure Rasa to use Google Cloud Storage for remote storage, so we can load models from the buckets we created earlier.
   additionalArgs:
@@ -94,6 +102,11 @@ rasa:
         secretKeyRef:
           name: rasa-secrets
           key: rasaProLicense
+    - name: OPENAI_API_KEY
+      valueFrom:
+        secretKeyRef:
+          key: openaiApiKey
+          name: rasa-secrets
 # Disable other Rasa components for now.
 # https://rasa.com/docs/reference/integrations/analytics/
 rasaProServices:

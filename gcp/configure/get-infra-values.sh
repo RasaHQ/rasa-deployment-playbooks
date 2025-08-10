@@ -1,3 +1,5 @@
+set -e
+
 echo "Fetching some infrastructure values..."
 export DB_HOST=$(gcloud sql instances describe $NAME --format='value(ipAddresses[0].ipAddress)')
 export REDIS_HOST=$(gcloud redis instances describe $NAME --region=$REGION --format='value(host)')

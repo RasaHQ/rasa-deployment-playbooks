@@ -1,3 +1,5 @@
+# Define the version of Rasa Studio to use.
+tag: "1.13.0"
 config:
   # -- Defines the host name for all the Studio ingress resources. Make sure you provide a valid host name.
   ingressHost: &dns_hostname "studio.${DOMAIN}"
@@ -46,6 +48,8 @@ eventIngestion:
       value: rasa
     KAFKA_GROUP_ID:
       value: studio
+    KAFKA_DLQ_TOPIC:
+      value: rasa-events-dlq
 web-client:
   serviceAccount:
     # -- serviceAccount.create specifies whether a service account should be created

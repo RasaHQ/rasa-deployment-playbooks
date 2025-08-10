@@ -1,3 +1,4 @@
+set -e
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -25,8 +26,7 @@ $ISTIO version
 
 # Install Istio onto Your Cluster
 # Use our preconfigured YAML files to install Istio onto your cluster.
-echo "Creating the Istio Operator on your cluster..."
-kubectl apply -f "$SCRIPT_DIR/istio-operator.yaml"
+
 
 echo "Installing Istio on your cluster..."
 $ISTIO install --set profile=demo --skip-confirmation -f "$SCRIPT_DIR/istio-operator.yaml"

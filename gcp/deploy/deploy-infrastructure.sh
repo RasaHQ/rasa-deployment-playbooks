@@ -1,3 +1,5 @@
+set -e
+
 echo "Enabling required services on GCP. This might take a few minutes..."
 # GCP requires that you enable the services you wish to use in each project before you can deploy infrastructure.
 # We'll attempt to enable the following services:
@@ -161,7 +163,7 @@ echo "Creating Rasa Service Account and assigning roles..."
 gcloud iam service-accounts create $NAME-assistant
 
 gcloud iam service-accounts add-iam-policy-binding $NAME-assistant@$PROJECT_ID.iam.gserviceaccount.com \
-  --member="serviceAccount:$PROJECT_ID.svc.id.goog[rasa-assistant/$NAMESPACE]" \
+  --member="serviceAccount:$PROJECT_ID.svc.id.goog[$NAMESPACE/assistant]" \
   --role="roles/iam.workloadIdentityUser"
 echo "Rasa Service Account created and configured"
 
@@ -169,7 +171,7 @@ echo "Creating Rasa Studio Service Account and assigning roles..."
 gcloud iam service-accounts create $NAME-studio
 
 gcloud iam service-accounts add-iam-policy-binding $NAME-studio@$PROJECT_ID.iam.gserviceaccount.com \
-  --member="serviceAccount:$PROJECT_ID.svc.id.goog[rasa-studio/$NAMESPACE]" \
+  --member="serviceAccount:$PROJECT_ID.svc.id.goog[$NAMESPACE/studio]" \
   --role="roles/iam.workloadIdentityUser"
 
 # Create PostgreSQL instance
@@ -275,7 +277,6 @@ gcloud sql databases create $DB_STUDIO_DATABASE --instance=$NAME
 gcloud sql users create $DB_STUDIO_USERNAME --instance=$NAME --password=$DB_STUDIO_PASSWORD
 
 gcloud sql databases create $DB_KEYCLOAK_DATABASE --instance=$NAME
-gcloud sql users create $DB_KEYCLOAK_USERNAME --instance=$NAME --password=$DB_KEYCLOAK_PASSWORD
 echo "PostgreSQL users and databases created."
 
 echo "Infrastructure deployed! Check the output above for any errors."
