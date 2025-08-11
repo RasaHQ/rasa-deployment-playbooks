@@ -1,0 +1,7 @@
+crds:
+  enabled: true
+serviceAccount:
+  annotations:
+    iam.gke.io/gcp-service-account: $NAME-dns@$PROJECT_ID.iam.gserviceaccount.com
+prometheus:
+  enabled: true
