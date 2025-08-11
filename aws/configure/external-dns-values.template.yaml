@@ -2,7 +2,7 @@ serviceAccount:
   create: true
   name: external-dns
   annotations:
-    iam.gke.io/gcp-service-account: $NAME-dns@$PROJECT_ID.iam.gserviceaccount.com
+    eks.amazonaws.com/role-arn: $SERVICE_ACCOUNT_DNS_ARN
 
 rbac:
   create: true
@@ -16,10 +16,11 @@ sources:
 txtOwnerId: $NAME
 
 provider: 
-  name: google
+  name: aws
 
-extraArgs:
-  - --google-project=$PROJECT_ID
+env:
+  - name: AWS_DEFAULT_REGION
+    value: $REGION
 
 domainFilters:
   - $DOMAIN

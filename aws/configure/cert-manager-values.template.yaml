@@ -2,6 +2,6 @@ crds:
   enabled: true
 serviceAccount:
   annotations:
-    iam.gke.io/gcp-service-account: $NAME-dns@$PROJECT_ID.iam.gserviceaccount.com
+    eks.amazonaws.com/role-arn: $SERVICE_ACCOUNT_DNS_ARN
 prometheus:
   enabled: true
