@@ -41,4 +41,4 @@ aws/studio/values.yaml
 aws/studio/certificate.yaml
 
 # Dev
-aws/setup/environment-variable-dev.sh
+aws/setup/environment-variables-dev.sh
