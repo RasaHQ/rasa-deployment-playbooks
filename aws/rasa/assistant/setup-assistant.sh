@@ -26,7 +26,7 @@ echo "Creating secrets for the Rasa assistant to use..."
 export AUTH_TOKEN=$(openssl rand -hex 8 | base64)
 export JWT_SECRET=$(openssl rand -hex 8 | base64)
 export DB_PWD=${DB_ASSISTANT_PASSWORD:-'Password is not set! Set it manually with `export DB_PWD=yourpassword`'}
-export REDIS_PASSWORD=${REDIS_AUTH:-$(gcloud redis instances get-auth-string $NAME --region=$REGION --format='value(authString)')}
+export REDIS_PASSWORD=${REDIS_AUTH:-'Redis password is not set! Set it manually with `export REDIS_AUTH=yourpassword`'}
 export KAFKA_CLIENT_PASSWORD=$(kubectl get secret kafka-user-passwords -n $NAMESPACE -o jsonpath='{.data.client-passwords}' | base64 -d | cut -d ',' -f 1)
 export RASA_PRO_LICENSE=${RASA_PRO_LICENSE:-'Rasa License is not set! Set it manually with `export RASA_PRO_LICENSE=yourlicense`'}
 export OPENAI_API_KEY=${OPENAI_API_KEY:-'OpenAI API Key is not set! Set it manually with `export OPENAI_API_KEY=yourkey`'}

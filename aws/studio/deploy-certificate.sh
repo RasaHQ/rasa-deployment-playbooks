@@ -8,7 +8,7 @@ export KUBECONFIG=$(pwd)/kubeconfig
 echo "Kubeconfig path:  $KUBECONFIG"
 rm -f $KUBECONFIG
 #Retrieve the credentials for the cluster using the gcloud CLI:
-gcloud container clusters get-credentials $NAME --region=$REGION 
+aws eks update-kubeconfig --region $REGION --name $NAME
 # Next, validate that the credentials work - we should see information about our cluster output here if everything has worked.
 echo "Kubeconfig generated successfully! Printing cluster info below, if you see output here, authentication was successful."
 kubectl cluster-info

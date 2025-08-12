@@ -1,14 +1,14 @@
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-echo "Generating kubeconfig to authenticate with GKE cluster..."
-# To be able to interact with the GKE cluster we deployed earlier, we need to obtain the credentials for it. These credentials are saved in a file called kubeconfig which the gcloud CLI can generate for us and kubectl can use.
+echo "Generating kubeconfig to authenticate with EKS cluster..."
+# To be able to interact with the EKS cluster we deployed earlier, we need to obtain the credentials for it. These credentials are saved in a file called kubeconfig which the AWS CLI can generate for us and kubectl can use.
 # Ensure we've got a path setup for the kubeconfig file:
 export KUBECONFIG=$(pwd)/kubeconfig
 echo "Kubeconfig path:  $KUBECONFIG"
 rm -f $KUBECONFIG
-#Retrieve the credentials for the cluster using the gcloud CLI:
-gcloud container clusters get-credentials $NAME --region=$REGION 
+#Retrieve the credentials for the cluster using the AWS CLI:
+aws eks update-kubeconfig --region $REGION --name $NAME
 # Next, validate that the credentials work - we should see information about our cluster output here if everything has worked.
 echo "Kubeconfig generated successfully! Printing cluster info below, if you see output here, authentication was successful."
 kubectl cluster-info
@@ -22,7 +22,7 @@ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --v
 echo "Creating secrets for the Rasa Studio to use..."
 export KEYCLOAK_ADMIN_PASSWORD=$(openssl rand -hex 8 | base64)
 export KEYCLOAK_API_PASSWORD=$(openssl rand -hex 8 | base64)
-export REDIS_PASSWORD=${REDIS_AUTH:-$(gcloud redis instances get-auth-string $NAME --region=$REGION --format='value(authString)')}
+export REDIS_PASSWORD=${REDIS_AUTH:-'Redis password is not set! Set it manually with `export REDIS_AUTH=yourpassword`')}
 export KAFKA_CLIENT_PASSWORD=$(kubectl get secret kafka-user-passwords -n $NAMESPACE -o jsonpath='{.data.client-passwords}' | base64 -d | cut -d ',' -f 1)
 export OPENAI_API_KEY_SECRET_KEY=${OPENAI_API_KEY:-'OpenAI API Key is not set! Set it manually with `export OPENAI_API_KEY=yourkey`'}
 export DB_STUDIO_PASSWORD=${DB_STUDIO_PASSWORD:-'Password is not set! Set it manually with `export DB_STUDIO_PASSWORD=yourpassword`'}
