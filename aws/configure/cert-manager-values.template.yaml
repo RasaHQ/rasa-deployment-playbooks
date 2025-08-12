@@ -2,6 +2,6 @@ crds:
   enabled: true
 serviceAccount:
   annotations:
-    eks.amazonaws.com/role-arn: $SERVICE_ACCOUNT_DNS_ARN
+    eks.amazonaws.com/role-arn: $SERVICE_ACCOUNT_DNS
 prometheus:
   enabled: true

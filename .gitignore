@@ -19,7 +19,7 @@ gcp/studio/repos/*
 gcp/studio/values.yaml
 gcp/studio/certificate.yaml
 
-aws/deploy/main.tf
+aws/deploy/_tf/*
 aws/deploy/.terraform/*
 aws/deploy/.terraform.lock.hcl
 aws/deploy/terraform.tfstate
@@ -39,6 +39,7 @@ aws/rasa/ingress/certificate.yaml
 aws/studio/repos/*
 aws/studio/values.yaml
 aws/studio/certificate.yaml
+secret_db.json
 
 # Dev
 aws/setup/environment-variables-dev.sh

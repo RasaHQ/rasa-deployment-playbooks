@@ -2,19 +2,6 @@ set -e
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-echo "Generating kubeconfig to authenticate with AWS EKS cluster..."
-# To be able to interact with the EKS cluster we deployed earlier, we need to obtain the credentials for it. These credentials are saved in a file called kubeconfig which the AWS CLI can generate for us and kubectl can use.
-# Ensure we've got a path setup for the kubeconfig file:
-export KUBECONFIG=$(pwd)/kubeconfig
-echo "Kubeconfig path:  $KUBECONFIG"
-rm -f $KUBECONFIG
-#Retrieve the credentials for the cluster using the AWS CLI:
-aws eks update-kubeconfig --region $REGION --name $NAME
-# Next, validate that the credentials work - we should see information about our cluster output here if everything has worked.
-echo "Kubeconfig generated successfully! Printing cluster info below, if you see output here, authentication was successful."
-kubectl cluster-info
-kubectl get ns
-
 echo "Setting up Istio..."
 # Download and install the istioctl tool for managing Istio, the service mesh that will ensure that communication between different Rasa product components is encrypted in transit, on your cluster:
 curl -L https://istio.io/downloadIstio | sh -
@@ -37,4 +24,6 @@ kubectl apply -f "$SCRIPT_DIR/istio-ingress-class.yaml"
 # Retrieve the the nameservers of the zone you have just created in GCP:
 echo "Retrieving the nameservers of the zone you have just created in GCP..."
 echo "You must now create an NS record for your domain $DOMAIN with the following values:"
-echo "TODO: Add NS records command here"
+TARGET_DIR_RELATIVE="$SCRIPT_DIR/../deploy/_tf"
+TARGET_DIR_ABSOLUTE=$(realpath "$TARGET_DIR_RELATIVE")
+$TF_CMD -chdir=$TARGET_DIR_ABSOLUTE output dns_name_servers
