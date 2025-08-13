@@ -3,7 +3,7 @@ set -e
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-echo "Generating kubeconfig to authenticate with GKE cluster..."
+echo "Generating kubeconfig to authenticate with EKS cluster..."
 # To be able to interact with the EKS cluster we deployed earlier, we need to obtain the credentials for it. These credentials are saved in a file called kubeconfig which the AWS CLI can generate for us and kubectl can use.
 # Ensure we've got a path setup for the kubeconfig file:
 export KUBECONFIG=$(pwd)/kubeconfig
