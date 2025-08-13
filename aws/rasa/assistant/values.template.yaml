@@ -1,10 +1,10 @@
 rasa:
   enabled: true
   # Configure the service account which allows Rasa to interact with GCP resources like reading data from Cloud Storage buckets.
-  serviceAccountName: assistant
+  serviceAccountName: rasa-assistant
   serviceAccount:
     create: true
-    name: assistant
+    name: rasa-assistant
     annotations:
       eks.amazonaws.com/role-arn: ${SERVICE_ACCOUNT_ASSISTANT}
   settings:
