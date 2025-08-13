@@ -3,7 +3,7 @@
 # You must change the following variables to match your environment
 #--------------------------------
 # Set the value of this to terrarform if you've chosen to use Terraform for deployment or tofu if you've chosen to use OpenTofu for deployment.
-export TF_COMMAND=tofu
+export TF_CMD=tofu
 # Change this to the name of the AWS profile you want to use which you have configured in your ~/.aws/config file.
 export AWS_PROFILE=your-aws-profile-name
 # Change this to the AWS region you want to deploy to. Find the available regions here: https://docs.aws.amazon.com/global-infrastructure/latest/regions/aws-regions.html
@@ -102,4 +102,4 @@ echo "DB studio username:     $DB_STUDIO_USERNAME"
 echo "DB keycloak database:  $DB_KEYCLOAK_DATABASE"
 echo "PostgreSQL version:     $PG_VERSION"
 echo "--------------------------------"
-echo "If any of the above values are incorrect or blank, please update the file and re-run.
+echo "If any of the above values are incorrect or blank, please update the file and re-run."

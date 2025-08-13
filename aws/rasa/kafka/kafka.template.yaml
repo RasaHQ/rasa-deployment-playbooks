@@ -1,5 +1,5 @@
 global:
-  storageClass: premium-rwo
+  storageClass: auto-ebs-sc
 
 replicaCount: 3
 defaultReplicationFactor: 2
@@ -19,8 +19,3 @@ sasl:
     # Let the chart generate passwords automatically
     passwords:
       - $KAFKA_PASSWORD
-
-zookeeper:
-  enabled: true
-  persistence:
-    storageClass: premium-rwo

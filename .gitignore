@@ -19,7 +19,7 @@ gcp/studio/repos/*
 gcp/studio/values.yaml
 gcp/studio/certificate.yaml
 
-aws/deploy/main.tf
+aws/deploy/_tf/*
 aws/deploy/.terraform/*
 aws/deploy/.terraform.lock.hcl
 aws/deploy/terraform.tfstate
@@ -29,6 +29,7 @@ aws/configure/cert-manager-values.yaml
 aws/configure/external-dns-values.yaml
 aws/configure/test-ingress-certificate.yaml
 aws/configure/test-ingress-httpbin-values.yaml
+aws/configure/db-init.yaml
 aws/rasa/kafka/client.properties
 aws/rasa/kafka/kafka_jaas.conf
 aws/rasa/kafka/kafka.yaml
@@ -39,6 +40,7 @@ aws/rasa/ingress/certificate.yaml
 aws/studio/repos/*
 aws/studio/values.yaml
 aws/studio/certificate.yaml
+secret_db.json
 
 # Dev
-aws/setup/environment-variable-dev.sh
+aws/setup/environment-variables-dev.sh
