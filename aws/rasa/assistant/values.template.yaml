@@ -59,7 +59,7 @@ rasa:
         security_protocol: SASL_PLAINTEXT
         sasl_mechanism: PLAIN
         topic: rasa
-        url: kafka-controller-headless.rasa.svc.cluster.local:9092
+        url: kafka-controller-headless.${NAMESPACE}.svc.cluster.local:9092
         sasl_username: ${KAFKA_USER}
         sasl_password: ${KAFKA_PASSWORD}
         ssl_check_hostname: false
