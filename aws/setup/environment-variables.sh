@@ -2,7 +2,7 @@
 
 # You must change the following variables to match your environment
 #--------------------------------
-# Set the value of this to terrarform if you've chosen to use Terraform for deployment or tofu if you've chosen to use OpenTofu for deployment.
+# Set the value of this to terraform if you've chosen to use Terraform for deployment or tofu if you've chosen to use OpenTofu for deployment.
 export TF_CMD=tofu
 # Change this to the name of the AWS profile you want to use which you have configured in your ~/.aws/config file.
 export AWS_PROFILE=your-aws-profile-name
