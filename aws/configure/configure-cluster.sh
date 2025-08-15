@@ -21,8 +21,8 @@ echo "Creating the Istio Ingress Class on your cluster..."
 kubectl apply -f "$SCRIPT_DIR/istio-ingress-class.yaml"
 
 # You will now need to update some DNS records on your domain. You will need to find where your DNS is configured for your domain - this may be a cloud provider like AWS or a domain registrar like GoDaddy or Cloudflare.
-# Retrieve the the nameservers of the zone you have just created in GCP:
-echo "Retrieving the nameservers of the zone you have just created in GCP..."
+# Retrieve the the nameservers of the zone you have just created in AWS:
+echo "Retrieving the nameservers of the zone you have just created in AWS..."
 echo "You must now create an NS record for your domain $DOMAIN with the following values:"
 TARGET_DIR_RELATIVE="$SCRIPT_DIR/../deploy/_tf"
 TARGET_DIR_ABSOLUTE=$(realpath "$TARGET_DIR_RELATIVE")
