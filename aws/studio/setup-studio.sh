@@ -38,7 +38,7 @@ echo "OPENAI_API_KEY_SECRET_KEY: $OPENAI_API_KEY_SECRET_KEY"
 echo "DB_STUDIO_PASSWORD: $DB_STUDIO_PASSWORD"
 
 echo "Deleting a secret if it already exists..."
-kubectl delete secret studio-secrets -n $NAMESPACE
+kubectl delete secret studio-secrets -n $NAMESPACE || true
 
 echo "Creating a Kubernetes secret for these values..."
 kubectl --namespace $NAMESPACE \
