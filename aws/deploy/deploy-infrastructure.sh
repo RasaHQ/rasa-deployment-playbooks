@@ -1,3 +1,5 @@
+set-e
+
 # Fail on errors so you can debug
 set -e
 

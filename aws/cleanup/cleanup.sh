@@ -1,4 +1,3 @@
-
 set -e
 echo "Starting cleanup of AWS infrastructure..."
 

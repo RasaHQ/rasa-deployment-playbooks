@@ -1,3 +1,5 @@
+set -e
+
 echo "Starting cleanup of GCP infrastructure..."
 
 echo "Deleting PostgreSQL instance..."
