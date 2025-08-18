@@ -37,7 +37,7 @@ echo "KAFKA_CLIENT_PASSWORD: $KAFKA_CLIENT_PASSWORD"
 echo "OPENAI_API_KEY_SECRET_KEY: $OPENAI_API_KEY_SECRET_KEY"
 echo "DB_STUDIO_PASSWORD: $DB_STUDIO_PASSWORD"
 
-echo "Checking if a secret already exists..."
+echo "Deleting a secret if it already exists..."
 kubectl delete secret studio-secrets -n $NAMESPACE
 
 echo "Creating a Kubernetes secret for these values..."
