@@ -29,7 +29,9 @@ envsubst < $SCRIPT_DIR/cert-manager-certificate-issuer.template.yaml > $SCRIPT_D
 kubectl apply -f $SCRIPT_DIR/cert-manager-certificate-issuer.yaml
 print_info "Cert-manager configured to issue LetsEncrypt certificates!"
 
-# Validate that the ClusterIssuer was created successfully:
+# Wait for the ClusterIssuer to be created successfully:
 print_info "Validating that the ClusterIssuer was created successfully..."
-print_info "You should see a ClusterIssuer named letsencrypt with a status of Ready:"
-kubectl get ClusterIssuer letsencrypt
+print_info "Waiting for ClusterIssuer letsencrypt to become Ready..."
+kubectl wait --for=condition=Ready clusterissuer/letsencrypt --timeout=180s
+print_info "ClusterIssuer letsencrypt is Ready:"
+kubectl get clusterissuer letsencrypt
