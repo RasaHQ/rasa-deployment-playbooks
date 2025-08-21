@@ -256,8 +256,8 @@ echo "Creating Redis instance..."
 echo "Waiting for Redis instance to be up before continuing. This may take a few minutes..."
 gcloud redis instances create $NAME \
   --region=$REGION \
-  --zone=$REGION-a \
-  --alternative-zone=$REGION-b \
+  --zone=$ZONE_1 \
+  --alternative-zone=$ZONE_2 \
   --tier=standard \
   --size=1 \
   --network=$NETWORK_LINK \

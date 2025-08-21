@@ -34,6 +34,11 @@ export BUCKET_NAME_ENTROPY="xbuc"
 export MODEL_BUCKET="${MY_COMPANY_NAME}-${BUCKET_NAME_ENTROPY}-${NAME}-model"
 # The name of the bucket used to store models for Rasa Studio.
 export STUDIO_BUCKET="${MY_COMPANY_NAME}-${BUCKET_NAME_ENTROPY}-${NAME}-studio"
+# Primary zone to deploy Redis to. Default is the first zone in the region.
+# See available zones here: https://cloud.google.com/compute/docs/regions-zones
+export ZONE_1=$(gcloud compute zones list --format="value(name)" --filter="region:$REGION" --sort-by=name | sed -n '1p')
+# Alternative zone to deploy Redis to. Default is the second zone in the region.
+export ZONE_2=$(gcloud compute zones list --format="value(name)" --filter="region:$REGION" --sort-by=name | sed -n '2p')
 # Process your domain name to create a DNS zone name for GCP Cloud DNS.
 export DNS_ZONE=$(echo "$DOMAIN" | sed -e 's/\./-/g')
 # The Kubernetes namespace that will be used for the deployment.
@@ -60,6 +65,8 @@ export SERVICE_ACCOUNT_STUDIO="${NAME}-studio@${PROJECT_ID}.iam.gserviceaccount.
 # Print the environment variables so you can see they're all set correctly.
 echo "GCP Project:               $PROJECT_ID"
 echo "GCP region:                $REGION"
+echo "GCP primary zone:          $ZONE_1"
+echo "GCP alternative zone:      $ZONE_2"
 echo "Domain:                    $DOMAIN"
 echo "Let's Encrypt email:       $MY_EMAIL"
 echo "Company name:              $MY_COMPANY_NAME"
