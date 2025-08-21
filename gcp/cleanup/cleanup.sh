@@ -1,40 +1,44 @@
-set -e
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-echo "Starting cleanup of GCP infrastructure..."
+# Source common utilities
+source "$SCRIPT_DIR/../../utils/common.sh"
 
-echo "Deleting PostgreSQL instance..."
+print_info "Starting cleanup of GCP infrastructure..."
+
+print_info "Deleting PostgreSQL instance..."
 gcloud sql instances delete $NAME
 
-echo "Deleting GKE cluster..."
+print_info "Deleting GKE cluster..."
 gcloud container clusters delete $NAME --region=$REGION
 
-echo "Deleting Redis instance..."
+print_info "Deleting Redis instance..."
 gcloud redis instances delete $NAME --region=$REGION 
 
-echo "Removing local kubeconfig file..."
+print_info "Removing local kubeconfig file..."
 rm ./kubeconfig
-echo "Local kubeconfig file removed."
+print_info "Local kubeconfig file removed."
 
-echo "Deleting Cloud Storage buckets..."
+print_info "Deleting Cloud Storage buckets..."
 gcloud storage buckets delete gs://$MODEL_BUCKET
 gcloud storage buckets delete gs://$STUDIO_BUCKET
 
-echo "Deleting service accounts..."
+print_info "Deleting service accounts..."
 gcloud iam service-accounts delete $NAME-dns@$PROJECT_ID.iam.gserviceaccount.com
 gcloud iam service-accounts delete $NAME-gke@$PROJECT_ID.iam.gserviceaccount.com
 gcloud iam service-accounts delete $NAME-assistant@$PROJECT_ID.iam.gserviceaccount.com
 gcloud iam service-accounts delete $NAME-studio@$PROJECT_ID.iam.gserviceaccount.com
 
-echo "Deleting VPC peering connection..."
+print_info "Deleting VPC peering connection..."
 gcloud services vpc-peerings delete --network=$NAME  --service=servicenetworking.googleapis.com
 
-echo "Deleting private service access address..."
+print_info "Deleting private service access address..."
 gcloud compute addresses delete $NAME --global
 
-echo "Deleting VPC subnets..."
+print_info "Deleting VPC subnets..."
 gcloud compute networks subnets delete $NAME --region $REGION
 
-echo "Deleting VPC network..."
+print_info "Deleting VPC network..."
 gcloud compute networks delete $NAME
 
-echo "Cleanup completed! Check the output above for any errors."
+print_info "Cleanup completed! Check the output above for any errors."

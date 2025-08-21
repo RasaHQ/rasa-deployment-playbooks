@@ -1,10 +1,11 @@
-set-e
-
-# Fail on errors so you can debug
 set -e
 
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Source common utilities
+source "$SCRIPT_DIR/../../utils/common.sh"
+
 mkdir -p $SCRIPT_DIR/_tf
 
 # Substitute the values in the template file with the actual values:
