@@ -4,7 +4,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Source common utilities
-source "$SCRIPT_DIR/../../utils/common.sh"
+source "$SCRIPT_DIR/../../../utils/common.sh"
 
 print_info "Generating kubeconfig to authenticate with EKS cluster..."
 # To be able to interact with the EKS cluster we deployed earlier, we need to obtain the credentials for it. These credentials are saved in a file called kubeconfig which the AWS CLI can generate for us and kubectl can use.
