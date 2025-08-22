@@ -54,8 +54,9 @@ create secret generic studio-secrets \
 --from-literal=DATABASE_PASSWORD="$(echo $DB_STUDIO_PASSWORD)" \
 --from-literal=DATABASE_URL="postgresql://${DB_STUDIO_USERNAME}:${DB_STUDIO_PASSWORD}@${DB_HOST}:5432/${DB_STUDIO_DATABASE}"
 
-
-print_info "\n\nKEYCLOAK CREDENTIALS"
+print_info ""
+print_info ""
+print_info "KEYCLOAK CREDENTIALS"
 print_info "===================="
 print_info "You will need to set the following credentials to set up Rasa Studio once it is deployed:"
 print_info "Username: kcadmin"
