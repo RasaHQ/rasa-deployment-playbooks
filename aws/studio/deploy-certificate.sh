@@ -22,3 +22,5 @@ kubectl get ns
 envsubst < $SCRIPT_DIR/certificate.template.yaml > $SCRIPT_DIR/certificate.yaml
 kubectl apply -f $SCRIPT_DIR/certificate.yaml
 print_info "Certificate deployed successfully!"
+
+print_info "You should now be able to access Rasa Studio at https://studio.$DOMAIN. It may take a few minutes for the certificate to issue and be fully available."
