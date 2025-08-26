@@ -19,3 +19,17 @@ sasl:
     # Let the chart generate passwords automatically
     passwords:
       - $KAFKA_PASSWORD
+
+image:
+  repository: bitnamilegacy/kafka
+defaultInitContainers:
+  volumePermissions:
+    image:
+      repository: bitnamilegacy/os-shell
+  autoDiscovery:
+    image:
+      repository: bitnamilegacy/kubectl
+metrics:
+  jmx:
+    image:
+      repository: bitnamilegacy/jmx-exporter

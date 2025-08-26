@@ -49,7 +49,7 @@ print_info "Client configuration for Rasa to use to connect to Kafka generated s
 
 # Next, we need to create Kafka topics that Rasa will use to send data through. We'll use the configuration files we've just generated which will also confirm that all the authentication is working properly.
 print_info "Starting a Kafka client to test authentication and create topics..."
-kubectl run kafka-client --restart='Never' --image docker.io/bitnami/kafka:3.4.0-debian-11-r15 --namespace $NAMESPACE \
+kubectl run kafka-client --restart='Never' --image bitnamilegacy/kafka:3.4.0-debian-11-r15 --namespace $NAMESPACE \
 --env="KAFKA_OPTS=-Djava.security.auth.login.config=/tmp/kafka_jaas.conf" \
 --env="NAMESPACE=$NAMESPACE" \
 --command -- sleep infinity

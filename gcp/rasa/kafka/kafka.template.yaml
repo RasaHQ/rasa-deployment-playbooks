@@ -1,5 +1,7 @@
 global:
   storageClass: premium-rwo
+  security:
+    allowInsecureImages: true
 
 replicaCount: 3
 defaultReplicationFactor: 2
@@ -24,3 +26,17 @@ zookeeper:
   enabled: true
   persistence:
     storageClass: premium-rwo
+
+image:
+  repository: bitnamilegacy/kafka
+defaultInitContainers:
+  volumePermissions:
+    image:
+      repository: bitnamilegacy/os-shell
+  autoDiscovery:
+    image:
+      repository: bitnamilegacy/kubectl
+metrics:
+  jmx:
+    image:
+      repository: bitnamilegacy/jmx-exporter
