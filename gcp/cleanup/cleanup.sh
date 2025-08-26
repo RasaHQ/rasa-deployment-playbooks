@@ -6,11 +6,11 @@ source "$SCRIPT_DIR/../../utils/common.sh"
 
 print_info "Starting cleanup of GCP infrastructure..."
 
-print_info "Deleting PostgreSQL instance..."
-gcloud sql instances delete $NAME
-
 print_info "Deleting GKE cluster..."
 gcloud container clusters delete $NAME --region=$REGION
+
+print_info "Deleting PostgreSQL instance..."
+gcloud sql instances delete $NAME
 
 print_info "Deleting Redis instance..."
 gcloud redis instances delete $NAME --region=$REGION 
@@ -28,6 +28,9 @@ gcloud iam service-accounts delete $NAME-dns@$PROJECT_ID.iam.gserviceaccount.com
 gcloud iam service-accounts delete $NAME-gke@$PROJECT_ID.iam.gserviceaccount.com
 gcloud iam service-accounts delete $NAME-assistant@$PROJECT_ID.iam.gserviceaccount.com
 gcloud iam service-accounts delete $NAME-studio@$PROJECT_ID.iam.gserviceaccount.com
+
+print_info "Deleting DNS zone..."
+gcloud dns managed-zones delete $DNS_ZONE
 
 print_info "Deleting VPC peering connection..."
 gcloud services vpc-peerings delete --network=$NAME  --service=servicenetworking.googleapis.com
