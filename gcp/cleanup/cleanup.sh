@@ -32,9 +32,6 @@ gcloud iam service-accounts delete $NAME-studio@$PROJECT_ID.iam.gserviceaccount.
 print_info "Deleting DNS zone..."
 gcloud dns managed-zones delete $DNS_ZONE
 
-print_info "Deleting VPC peering connection..."
-gcloud services vpc-peerings delete --network=$NAME  --service=servicenetworking.googleapis.com
-
 print_info "Deleting private service access address..."
 gcloud compute addresses delete $NAME --global
 
