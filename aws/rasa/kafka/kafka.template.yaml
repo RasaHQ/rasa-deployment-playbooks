@@ -1,5 +1,7 @@
 global:
   storageClass: auto-ebs-sc
+  security:
+    allowInsecureImages: true
 
 replicaCount: 3
 defaultReplicationFactor: 2
