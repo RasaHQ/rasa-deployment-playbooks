@@ -219,6 +219,8 @@ resource "aws_eks_addon" "ebs-csi" {
 resource "aws_route53_zone" "dns_zone" {
   name = "${DOMAIN}"
   comment = "${DOMAIN} (Rasa)"
+
+  force_destroy = true
 }
 
 output "domain" {
@@ -244,6 +246,8 @@ module "model_bucket" {
   expected_bucket_owner    = data.aws_caller_identity.current.account_id
 
   acl = "private"
+
+  force_destroy = true
 }
 
 module "studio_bucket" {
@@ -257,6 +261,8 @@ module "studio_bucket" {
   expected_bucket_owner    = data.aws_caller_identity.current.account_id
 
   acl = "private"
+
+  force_destroy = true
 }
 
 
