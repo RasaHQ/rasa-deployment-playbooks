@@ -31,6 +31,21 @@ else
   print_info "No EC2 Classic Load Balancers found associated with the EKS cluster."
 fi
 
+print_info "Finding and deleting security groups associated with the EKS cluster..."
+SECURITY_GROUPS=$(aws ec2 describe-security-groups --filters "Name=tag:kubernetes.io/cluster/$NAME,Values=owned" --query "SecurityGroups[].GroupId" --output text)
+if [ -n "$SECURITY_GROUPS" ]; then
+  if [ "$(echo "$SECURITY_GROUPS" | wc -w)" -gt 1 ]; then
+    print_error "Multiple security groups found. Please delete them manually:"
+    echo "$SECURITY_GROUPS"
+    exit 1
+  fi
+  print_info "Deleting security group: $SECURITY_GROUPS"
+  aws ec2 delete-security-group --group-id "$SECURITY_GROUPS"
+  print_info "Security group deleted successfully."
+else
+  print_info "No security groups found associated with the EKS cluster."
+fi
+
 TARGET_DIR_RELATIVE="$SCRIPT_DIR/../deploy/_tf"
 TARGET_DIR_ABSOLUTE=$(realpath "$TARGET_DIR_RELATIVE")
 $TF_CMD -chdir=$TARGET_DIR_ABSOLUTE destroy -auto-approve
