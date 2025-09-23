@@ -447,6 +447,24 @@ module "elasticache_security_group" {
   }
 }
 
+# Create ElastiCache user for IAM authentication
+resource "aws_elasticache_user" "iam_user" {
+  user_id             = "${NAME}-redis-user"
+  user_name           = "${NAME}-redis-user"  # Must be identical to user_id for IAM auth
+  engine              = "redis"
+  access_string       = "on ~* +@all"
+  authentication_mode {
+    type = "iam"
+  }
+}
+
+# Create ElastiCache user group for IAM authentication
+resource "aws_elasticache_user_group" "iam_user_group" {
+  user_group_id = "${NAME}-redis-iam-group"
+  engine        = "redis"
+  user_ids      = ["default", aws_elasticache_user.iam_user.user_id]
+}
+
 resource "aws_elasticache_replication_group" "group1" {
   automatic_failover_enabled  = true
   multi_az_enabled            = true
@@ -464,8 +482,7 @@ resource "aws_elasticache_replication_group" "group1" {
   subnet_group_name = module.vpc.elasticache_subnet_group_name
 
   transit_encryption_enabled = true
-  auth_token                 = "${REDIS_AUTH}"
-  auth_token_update_strategy = "SET"
+  user_group_ids             = [aws_elasticache_user_group.iam_user_group.user_group_id]
 
   network_type = "ipv4"
   security_group_ids = [module.elasticache_security_group.security_group_id]
@@ -473,6 +490,14 @@ resource "aws_elasticache_replication_group" "group1" {
 
 output "elasticache_primary_endpoint" {
   value = aws_elasticache_replication_group.group1.primary_endpoint_address
+}
+
+output "redis_iam_user" {
+  value = aws_elasticache_user.iam_user.user_id
+}
+
+output "redis_iam_user_group" {
+  value = aws_elasticache_user_group.iam_user_group.user_group_id
 }
 
 
@@ -527,6 +552,29 @@ resource "aws_iam_policy" "assistant" {
   })
 }
 
+# Redis IAM Access Policy
+resource "aws_iam_policy" "redis_access" {
+  name        = "${NAME}_redis_access"
+  path        = "/"
+  description = "Rasa ${NAME} Redis ElastiCache access via IAM"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "elasticache:Connect"
+        ]
+        Resource = [
+          "arn:aws:elasticache:${REGION}:${data.aws_caller_identity.current.account_id}:replicationgroup:${aws_elasticache_replication_group.group1.replication_group_id}",
+          "arn:aws:elasticache:${REGION}:${data.aws_caller_identity.current.account_id}:user:${aws_elasticache_user.iam_user.user_id}"
+        ]
+      },
+    ]
+  })
+}
+
 
 module "iam_role_assistant" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
@@ -536,6 +584,7 @@ module "iam_role_assistant" {
 
   role_policy_arns = {
     s3_policy   = aws_iam_policy.assistant.arn
+    redis_policy = aws_iam_policy.redis_access.arn
     rds_policy  = aws_iam_policy.rds_database_access.arn
   }
   

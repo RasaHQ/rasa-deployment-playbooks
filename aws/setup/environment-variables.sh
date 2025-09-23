@@ -19,8 +19,6 @@ export MY_EMAIL=email@example.com
 export MY_COMPANY_NAME="rasa"
 # The password you'd like to use for the Rasa Studio database.
 export DB_STUDIO_PASSWORD="your-studio-db-password"
-# The authentication string you'd like to use for Redis. This must be 16 to 128 alphanumeric characters.
-export REDIS_AUTH="changemechangeme123"
 # The license string for Rasa Pro.
 export RASA_PRO_LICENSE="Your Rasa Pro license string here"
 # Your OpenAI API Key.

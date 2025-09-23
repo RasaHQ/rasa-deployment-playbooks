@@ -46,7 +46,6 @@ rasa:
       lockStore:
         enabled: true
         type: concurrent_redis
-        password: ${REDIS_PASSWORD}
         port: 6379
         url: ${REDIS_HOST}
         use_ssl: true
@@ -90,11 +89,6 @@ rasa:
           key: kafkaSslPassword
     - name: KAFKA_USER
       value: kafka
-    - name: REDIS_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: rasa-secrets
-          key: redisPassword
     - name: RASA_PRO_LICENSE
       valueFrom:
         secretKeyRef:
