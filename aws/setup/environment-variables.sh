@@ -3,7 +3,7 @@
 # You must change the following variables to match your environment
 #--------------------------------
 # Set the value of this to terraform if you've chosen to use Terraform for deployment or tofu if you've chosen to use OpenTofu for deployment.
-export TF_CMD=tofu
+export TF_CMD=terraform
 # Change this to the name of the AWS profile you want to use which you have configured in your ~/.aws/config file.
 export AWS_PROFILE=your-aws-profile-name
 # Change this to the AWS region you want to deploy to. Find the available regions here: https://docs.aws.amazon.com/global-infrastructure/latest/regions/aws-regions.html
@@ -17,8 +17,6 @@ export DOMAIN=yourdomain.example.com
 export MY_EMAIL=email@example.com
 # Change this to the name of your company. This will be used to generate unique bucket names.
 export MY_COMPANY_NAME="rasa"
-# The password you'd like to use for the Rasa Pro database.
-export DB_ASSISTANT_PASSWORD="your-assistant-db-password"
 # The password you'd like to use for the Rasa Studio database.
 export DB_STUDIO_PASSWORD="your-studio-db-password"
 # The authentication string you'd like to use for Redis. This must be 16 to 128 alphanumeric characters.
@@ -55,6 +53,9 @@ export DB_STUDIO_USERNAME="studio"
 export DB_KEYCLOAK_DATABASE="keycloak"
 # The version of PostgreSQL Container to use for applying some configuration to the database.
 export PG_VERSION=17
+# SSL connect args for RDS PostgreSQL, TBC if these are needed.
+#export SQL_TRACKER_STORE_SSL_MODE=verify-full
+#export SQL_TRACKER_STORE_SSL_ROOT_CERTIFICATE=/var/lib/postgresql/rds-combined-ca-bundle.pem
 #--------------------------------
 
 # You almost certainly don't need to change the following environment variables which define the network architecture of the deployment.

@@ -340,6 +340,9 @@ module "rds_main" {
   monitoring_role_use_name_prefix       = true
   monitoring_role_description           = "Rasa ${NAME} RDS monitoring role"
 
+  # Enable IAM database authentication
+  iam_database_authentication_enabled = true
+
   parameters = [
     {
       name  = "autovacuum"
@@ -353,6 +356,30 @@ module "rds_main" {
 
 }
 
+# Create IAM database user
+resource "aws_db_instance_role_association" "rds_iam_user" {
+  db_instance_identifier = module.rds_main.db_instance_identifier
+  feature_name           = "IAM_DATABASE_AUTHENTICATION"
+  role_arn               = module.iam_role_rds_database.iam_role_arn
+}
+
+# Create database user for IAM authentication using local-exec
+resource "null_resource" "create_iam_db_user" {
+  depends_on = [aws_db_instance_role_association.rds_iam_user]
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      PGPASSWORD="${module.rds_main.db_instance_password}" psql -h "${module.rds_main.db_instance_endpoint}" -p "${module.rds_main.db_instance_port}" -U "${module.rds_main.db_instance_username}" -d "${module.rds_main.db_instance_name}" -c "CREATE ROLE \"${DB_ASSISTANT_USERNAME}\" WITH LOGIN;" || true
+      PGPASSWORD="${module.rds_main.db_instance_password}" psql -h "${module.rds_main.db_instance_endpoint}" -p "${module.rds_main.db_instance_port}" -U "${module.rds_main.db_instance_username}" -d "${module.rds_main.db_instance_name}" -c "GRANT rds_iam TO \"${DB_ASSISTANT_USERNAME}\";" || true
+    EOT
+  }
+
+  triggers = {
+    db_instance_id = module.rds_main.db_instance_identifier
+    role_arn       = module.iam_role_rds_database.iam_role_arn
+  }
+}
+
 output "secret_id_db" {
   value = module.rds_main.db_instance_master_user_secret_arn
 }
@@ -363,6 +390,18 @@ output "db_host" {
 
 output "db_port" {
   value = module.rds_main.db_instance_port
+}
+
+output "rds_iam_role_arn" {
+  value = module.iam_role_rds_database.iam_role_arn
+}
+
+output "rds_iam_db_user" {
+  value = "${DB_ASSISTANT_USERNAME}"
+}
+
+output "rds_iam_connection_string" {
+  value = "postgresql://${DB_ASSISTANT_USERNAME}@${module.rds_main.db_instance_endpoint}:${module.rds_main.db_instance_port}/${module.rds_main.db_instance_name}?sslmode=require"
 }
 
 
@@ -488,6 +527,7 @@ resource "aws_iam_policy" "assistant" {
   })
 }
 
+
 module "iam_role_assistant" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
   version = "~> 5.59"
@@ -495,7 +535,8 @@ module "iam_role_assistant" {
   role_name = "${NAME}-assistant"
 
   role_policy_arns = {
-    policy = aws_iam_policy.assistant.arn
+    s3_policy   = aws_iam_policy.assistant.arn
+    rds_policy  = aws_iam_policy.rds_database_access.arn
   }
   
   oidc_providers = {
@@ -535,6 +576,47 @@ resource "aws_iam_policy" "studio" {
       },
     ]
   })
+}
+
+# RDS Database Access Policy =========================================
+
+resource "aws_iam_policy" "rds_database_access" {
+  name        = "${NAME}_rds_database_access"
+  path        = "/"
+  description = "Rasa ${NAME} RDS database access via IAM"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "rds-db:connect"
+        ]
+        Resource = [
+          "arn:aws:rds-db:${REGION}:${data.aws_caller_identity.current.account_id}:dbuser:${module.rds_main.db_instance_identifier}/${DB_ASSISTANT_USERNAME}"
+        ]
+      },
+    ]
+  })
+}
+
+module "iam_role_rds_database" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "~> 5.59"
+
+  role_name = "${NAME}-rds-database"
+
+  role_policy_arns = {
+    policy = aws_iam_policy.rds_database_access.arn
+  }
+
+  oidc_providers = {
+    rasa = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["${NAMESPACE}:rasa-assistant"]
+    }
+  }
 }
 
 module "iam_role_studio" {
