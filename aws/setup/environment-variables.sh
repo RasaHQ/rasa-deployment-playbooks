@@ -5,7 +5,7 @@
 # Set the value of this to terraform if you've chosen to use Terraform for deployment or tofu if you've chosen to use OpenTofu for deployment.
 export TF_CMD=terraform
 # Change this to the name of the AWS profile you want to use which you have configured in your ~/.aws/config file.
-export AWS_PROFILE=your-aws-profile-name
+export AWS_PROFILE=default
 # Change this to the AWS region you want to deploy to. Find the available regions here: https://docs.aws.amazon.com/global-infrastructure/latest/regions/aws-regions.html
 export AWS_REGION=us-east-1
 export REGION=$AWS_REGION
@@ -33,6 +33,8 @@ export NAME=rasa
 export BUCKET_NAME_ENTROPY="xbuc"
 # The name of the bucket used to store models for Rasa Pro.
 export MODEL_BUCKET="${MY_COMPANY_NAME}-${BUCKET_NAME_ENTROPY}-${NAME}-model"
+# The name of the model to be uploaded to the model bucket as an initial model.
+export MODEL_PATH="model.tar.gz"
 # The name of the bucket used to store models for Rasa Studio.
 export STUDIO_BUCKET="${MY_COMPANY_NAME}-${BUCKET_NAME_ENTROPY}-${NAME}-studio"
 # Process your domain name to create a DNS zone name for Amazon Route 53.
@@ -51,9 +53,8 @@ export DB_STUDIO_USERNAME="studio"
 export DB_KEYCLOAK_DATABASE="keycloak"
 # The version of PostgreSQL Container to use for applying some configuration to the database.
 export PG_VERSION=17
-# SSL connect args for RDS PostgreSQL, TBC if these are needed.
-#export SQL_TRACKER_STORE_SSL_MODE=verify-full
-#export SQL_TRACKER_STORE_SSL_ROOT_CERTIFICATE=/var/lib/postgresql/rds-combined-ca-bundle.pem
+# The username for the ElastiCache Redis IAM role.
+export REDIS_USER="${NAME}-redis-user"
 #--------------------------------
 
 # You almost certainly don't need to change the following environment variables which define the network architecture of the deployment.
@@ -84,7 +85,6 @@ echo "AWS Region:             $AWS_REGION"
 echo "Domain:                 $DOMAIN"
 echo "Let's Encrypt email:    $MY_EMAIL"
 echo "Company name:           $MY_COMPANY_NAME"
-echo "DB assistant password:  $DB_ASSISTANT_PASSWORD"
 echo "DB studio password:     $DB_STUDIO_PASSWORD"
 echo "Rasa Pro license:       $RASA_PRO_LICENSE"
 echo "OpenAI API key:         $OPENAI_API_KEY"
@@ -99,6 +99,7 @@ echo "DB assistant username:  $DB_ASSISTANT_USERNAME"
 echo "DB studio database:     $DB_STUDIO_DATABASE"
 echo "DB studio username:     $DB_STUDIO_USERNAME"
 echo "DB keycloak database:   $DB_KEYCLOAK_DATABASE"
+echo "Redis user:             $REDIS_USER"
 echo "PostgreSQL version:     $PG_VERSION"
 echo "--------------------------------"
 echo "If any of the above values are incorrect or blank, please update the file and re-run."

@@ -12,7 +12,7 @@ aws eks update-kubeconfig --region $REGION --name $NAME
 
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TARGET_DIR_RELATIVE="$SCRIPT_DIR/../deploy/_tf"
+TARGET_DIR_RELATIVE="$SCRIPT_DIR/aws/deploy/_tf"
 TARGET_DIR_ABSOLUTE=$(realpath "$TARGET_DIR_RELATIVE")
 
 export DB_SECRET_ID=$($TF_CMD -chdir=$TARGET_DIR_ABSOLUTE output -raw secret_id_db)
@@ -38,7 +38,6 @@ echo "DB_ROOT_PW=$DB_ROOT_PW"
 echo "DB_PORT=$DB_PORT"
 echo "DB_HOST=$DB_HOST"
 echo "REDIS_HOST=$REDIS_HOST"
-echo "REDIS_AUTH=$REDIS_AUTH"
 echo "SERVICE_ACCOUNT_DNS=$SERVICE_ACCOUNT_DNS"
 echo "SERVICE_ACCOUNT_ASSISTANT=$SERVICE_ACCOUNT_ASSISTANT"
 echo "SERVICE_ACCOUNT_STUDIO=$SERVICE_ACCOUNT_STUDIO"

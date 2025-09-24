@@ -1,5 +1,9 @@
 rasa:
   enabled: true
+  image:
+    repository: "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"
+    pullPolicy: IfNotPresent
+    tag: "3.14.0.dev20250922"
   # Configure the service account which allows Rasa to interact with AWS resources like reading data from Cloud Storage buckets.
   serviceAccountName: rasa-assistant
   serviceAccount:
@@ -48,6 +52,7 @@ rasa:
         type: concurrent_redis
         port: 6379
         url: ${REDIS_HOST}
+        username: ${REDIS_USER}
         use_ssl: true
         key_prefix: ${NAME}
       # Configure the assistant to use the Kafka broker. This allows us to perform further processing on the messages, like using the Rasa Studio Conversation View or Rasa Pro Analytics.
@@ -65,6 +70,10 @@ rasa:
   additionalArgs:
     - --remote-storage
     - aws
+    - --model
+    - 20250906-111232-foggy-spaniel.tar.gz
+    - --debug
+    - --enable-api
   # Define the environment variables that Rasa needs to function and interact with the above services.
   # Note here that some of the values are plaintext environment variables and some are configured to be pulled from the Kubernetes Secret we created earlier.
   additionalEnv:
@@ -72,6 +81,8 @@ rasa:
       value: aws
     - name: AWS_DEFAULT_REGION
       value: ${AWS_REGION}
+    - name: SQL_TRACKER_STORE_SSL_MODE
+      value: require
     - name: RASA_ENVIRONMENT
       value: production
     - name: BUCKET_NAME
@@ -89,6 +100,10 @@ rasa:
           key: kafkaSslPassword
     - name: KAFKA_USER
       value: kafka
+    - name: REDIS_HOST
+      value: ${REDIS_HOST}
+    - name: REDIS_USER
+      value: ${REDIS_USER}
     - name: RASA_PRO_LICENSE
       valueFrom:
         secretKeyRef:

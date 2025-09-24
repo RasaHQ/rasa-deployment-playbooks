@@ -356,30 +356,6 @@ module "rds_main" {
 
 }
 
-# Create IAM database user
-resource "aws_db_instance_role_association" "rds_iam_user" {
-  db_instance_identifier = module.rds_main.db_instance_identifier
-  feature_name           = "IAM_DATABASE_AUTHENTICATION"
-  role_arn               = module.iam_role_rds_database.iam_role_arn
-}
-
-# Create database user for IAM authentication using local-exec
-resource "null_resource" "create_iam_db_user" {
-  depends_on = [aws_db_instance_role_association.rds_iam_user]
-
-  provisioner "local-exec" {
-    command = <<-EOT
-      PGPASSWORD="${module.rds_main.db_instance_password}" psql -h "${module.rds_main.db_instance_endpoint}" -p "${module.rds_main.db_instance_port}" -U "${module.rds_main.db_instance_username}" -d "${module.rds_main.db_instance_name}" -c "CREATE ROLE \"${DB_ASSISTANT_USERNAME}\" WITH LOGIN;" || true
-      PGPASSWORD="${module.rds_main.db_instance_password}" psql -h "${module.rds_main.db_instance_endpoint}" -p "${module.rds_main.db_instance_port}" -U "${module.rds_main.db_instance_username}" -d "${module.rds_main.db_instance_name}" -c "GRANT rds_iam TO \"${DB_ASSISTANT_USERNAME}\";" || true
-    EOT
-  }
-
-  triggers = {
-    db_instance_id = module.rds_main.db_instance_identifier
-    role_arn       = module.iam_role_rds_database.iam_role_arn
-  }
-}
-
 output "secret_id_db" {
   value = module.rds_main.db_instance_master_user_secret_arn
 }
@@ -395,15 +371,6 @@ output "db_port" {
 output "rds_iam_role_arn" {
   value = module.iam_role_rds_database.iam_role_arn
 }
-
-output "rds_iam_db_user" {
-  value = "${DB_ASSISTANT_USERNAME}"
-}
-
-output "rds_iam_connection_string" {
-  value = "postgresql://${DB_ASSISTANT_USERNAME}@${module.rds_main.db_instance_endpoint}:${module.rds_main.db_instance_port}/${module.rds_main.db_instance_name}?sslmode=require"
-}
-
 
 # Redis Elasticache =========================================
 
@@ -449,8 +416,8 @@ module "elasticache_security_group" {
 
 # Create ElastiCache user for IAM authentication
 resource "aws_elasticache_user" "iam_user" {
-  user_id             = "${NAME}-redis-user"
-  user_name           = "${NAME}-redis-user"  # Must be identical to user_id for IAM auth
+  user_id             = "${REDIS_USER}"
+  user_name           = "${REDIS_USER}"
   engine              = "redis"
   access_string       = "on ~* +@all"
   authentication_mode {
@@ -499,7 +466,6 @@ output "redis_iam_user" {
 output "redis_iam_user_group" {
   value = aws_elasticache_user_group.iam_user_group.user_group_id
 }
-
 
 
 # DNS Identity =========================================
@@ -566,10 +532,7 @@ resource "aws_iam_policy" "redis_access" {
         Action = [
           "elasticache:Connect"
         ]
-        Resource = [
-          "arn:aws:elasticache:${REGION}:${data.aws_caller_identity.current.account_id}:replicationgroup:${aws_elasticache_replication_group.group1.replication_group_id}",
-          "arn:aws:elasticache:${REGION}:${data.aws_caller_identity.current.account_id}:user:${aws_elasticache_user.iam_user.user_id}"
-        ]
+        Resource = "*"
       },
     ]
   })
@@ -595,6 +558,12 @@ module "iam_role_assistant" {
     }
   }
 }
+
+  # Add additional trusted services
+  trusted_role_services = [
+    "ec2.amazonaws.com"
+    ]
+  }
 
 locals {
   service_account_assistant = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${module.iam_role_assistant.iam_role_name}"
@@ -643,7 +612,7 @@ resource "aws_iam_policy" "rds_database_access" {
           "rds-db:connect"
         ]
         Resource = [
-          "arn:aws:rds-db:${REGION}:${data.aws_caller_identity.current.account_id}:dbuser:${module.rds_main.db_instance_identifier}/${DB_ASSISTANT_USERNAME}"
+          "arn:aws:rds-db:${REGION}:${data.aws_caller_identity.current.account_id}:dbuser:${module.rds_main.db_instance_resource_id}/${DB_ASSISTANT_USERNAME}"
         ]
       },
     ]
