@@ -559,12 +559,6 @@ module "iam_role_assistant" {
   }
 }
 
-  # Add additional trusted services
-  trusted_role_services = [
-    "ec2.amazonaws.com"
-    ]
-  }
-
 locals {
   service_account_assistant = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${module.iam_role_assistant.iam_role_name}"
 }
