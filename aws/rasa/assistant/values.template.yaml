@@ -104,6 +104,8 @@ rasa:
       value: ${REDIS_HOST}
     - name: REDIS_USER
       value: ${REDIS_USER}
+    - name: AWS_ELASTICACHE_CLUSTER_NAME
+      value: ${REDIS_CLUSTER_NAME}
     - name: RASA_PRO_LICENSE
       valueFrom:
         secretKeyRef:

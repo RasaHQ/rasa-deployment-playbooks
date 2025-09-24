@@ -467,6 +467,10 @@ output "redis_iam_user_group" {
   value = aws_elasticache_user_group.iam_user_group.user_group_id
 }
 
+output "elasticache_cluster_name" {
+  value = aws_elasticache_replication_group.group1.replication_group_id
+}
+
 
 # DNS Identity =========================================
 

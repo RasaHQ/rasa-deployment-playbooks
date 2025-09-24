@@ -5,7 +5,7 @@
 # Set the value of this to terraform if you've chosen to use Terraform for deployment or tofu if you've chosen to use OpenTofu for deployment.
 export TF_CMD=terraform
 # Change this to the name of the AWS profile you want to use which you have configured in your ~/.aws/config file.
-export AWS_PROFILE=default
+export AWS_PROFILE=your-aws-profile-name
 # Change this to the AWS region you want to deploy to. Find the available regions here: https://docs.aws.amazon.com/global-infrastructure/latest/regions/aws-regions.html
 export AWS_REGION=us-east-1
 export REGION=$AWS_REGION
@@ -23,6 +23,8 @@ export DB_STUDIO_PASSWORD="your-studio-db-password"
 export RASA_PRO_LICENSE="Your Rasa Pro license string here"
 # Your OpenAI API Key.
 export OPENAI_API_KEY="Your OpenAI API Key here"
+# The name of the model to be uploaded to the model bucket as an initial model.
+export MODEL_PATH="model.tar.gz"
 #--------------------------------
 
 # You can optionally change the following environment variables if you have specific requirements
@@ -33,8 +35,6 @@ export NAME=rasa
 export BUCKET_NAME_ENTROPY="xbuc"
 # The name of the bucket used to store models for Rasa Pro.
 export MODEL_BUCKET="${MY_COMPANY_NAME}-${BUCKET_NAME_ENTROPY}-${NAME}-model"
-# The name of the model to be uploaded to the model bucket as an initial model.
-export MODEL_PATH="model.tar.gz"
 # The name of the bucket used to store models for Rasa Studio.
 export STUDIO_BUCKET="${MY_COMPANY_NAME}-${BUCKET_NAME_ENTROPY}-${NAME}-studio"
 # Process your domain name to create a DNS zone name for Amazon Route 53.
