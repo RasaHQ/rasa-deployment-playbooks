@@ -25,7 +25,7 @@ export DB_PORT=$($TF_CMD -chdir=$TARGET_DIR_ABSOLUTE output -raw db_port)
 export DB_HOST=$($TF_CMD -chdir=$TARGET_DIR_ABSOLUTE output -raw db_host)
 export DB_HOST="${DB_HOST%:$DB_PORT}"
 
-export REDIS_HOST=$($TF_CMD -chdir=$TARGET_DIR_ABSOLUTE output -raw elasticache_primary_endpoint)
+export REDIS_HOST=$($TF_CMD -chdir=$TARGET_DIR_ABSOLUTE output -raw elasticache_cfg_endpoint)
 export REDIS_CLUSTER_NAME=$($TF_CMD -chdir=$TARGET_DIR_ABSOLUTE output -raw elasticache_cluster_name)
 
 export SERVICE_ACCOUNT_DNS=$($TF_CMD -chdir=$TARGET_DIR_ABSOLUTE output -raw service_account_dns)
