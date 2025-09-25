@@ -34,6 +34,14 @@ rasa:
         models:
         - model: text-embedding-3-small
           provider: openai
+      - id: anca-bedrock
+        models:
+          - provider: bedrock
+            model: anthropic.claude-3-7-sonnet-20250219-v1:0
+            model_id: arn:aws:bedrock:us-east-1:536697270625:inference-profile/us.anthropic.claude-3-7-sonnet-20250219-v1:0
+            aws_region_name: us-east-1
+            request_timeout: 7
+            max_tokens: 256
       models:
         enabled: false
       # Configure the assistant to use our PostgreSQL instance as the Tracker Store, which records the assistant's conversations.
@@ -71,7 +79,7 @@ rasa:
     - --remote-storage
     - aws
     - --model
-    - 20250906-111232-foggy-spaniel.tar.gz
+    - 20250924-160621-succulent-ravelin.tar.gz
     - --debug
     - --enable-api
   # Define the environment variables that Rasa needs to function and interact with the above services.
