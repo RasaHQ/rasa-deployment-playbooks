@@ -63,6 +63,7 @@ rasa:
         username: ${REDIS_USER}
         use_ssl: true
         key_prefix: ${NAME}
+        deployment_mode: "cluster"
       # Configure the assistant to use the Kafka broker. This allows us to perform further processing on the messages, like using the Rasa Studio Conversation View or Rasa Pro Analytics.
       eventBroker:
         enabled: true
