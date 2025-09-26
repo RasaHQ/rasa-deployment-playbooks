@@ -4,11 +4,11 @@ rasa:
     repository: "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"
     pullPolicy: IfNotPresent
     tag: "3.14.0.dev20250922"
-    volumeMounts:
-      - name: amazon-root-ca
-        mountPath: /app/AmazonRootCA1.pem
-        subPath: AmazonRootCA1.pem
-        readOnly: true
+  volumeMounts:
+    - name: amazon-root-ca
+      mountPath: /app/AmazonRootCA1.pem
+      subPath: AmazonRootCA1.pem
+      readOnly: true
   volumes:
     - name: amazon-root-ca
       secret:
@@ -82,7 +82,7 @@ rasa:
         topic: rasa
         url: ${KAFKA_BOOTSTRAP_SERVER}
         ssl_check_hostname: true
-        ssl_cafile: /app/AmazonRootCA1.pem
+        ssl_cafile: AmazonRootCA1.pem
         partition_by_sender: true
   # We'll configure Rasa to use Google Cloud Storage for remote storage, so we can load models from the buckets we created earlier.
   additionalArgs:
