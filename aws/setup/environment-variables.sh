@@ -67,16 +67,19 @@ export CIDR_PUBLIC_A=10.100.4.0/22
 export CIDR_PRIVATE_A=10.100.8.0/21
 export CIDR_DB_A=10.100.16.0/21
 export CIDR_ELASTICACHE_A=10.100.24.0/21
+export CIDR_MSK_A=10.100.96.0/21
 
 export CIDR_PUBLIC_B=10.100.36.0/22
 export CIDR_PRIVATE_B=10.100.40.0/21
 export CIDR_DB_B=10.100.48.0/21
 export CIDR_ELASTICACHE_B=10.100.56.0/21
+export CIDR_MSK_B=10.100.104.0/21
 
 export CIDR_PUBLIC_C=10.100.68.0/22
 export CIDR_PRIVATE_C=10.100.72.0/21
 export CIDR_DB_C=10.100.80.0/21
 export CIDR_ELASTICACHE_C=10.100.88.0/21
+export CIDR_MSK_C=10.100.112.0/21
 #--------------------------------
 
 # Print the environment variables so you can see they're all set correctly.

@@ -4,6 +4,15 @@ rasa:
     repository: "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"
     pullPolicy: IfNotPresent
     tag: "3.14.0.dev20250922"
+    volumeMounts:
+      - name: amazon-root-ca
+        mountPath: /app/AmazonRootCA1.pem
+        subPath: AmazonRootCA1.pem
+        readOnly: true
+  volumes:
+    - name: amazon-root-ca
+      secret:
+        secretName: msk-ssl-ca
   # Configure the service account which allows Rasa to interact with AWS resources like reading data from Cloud Storage buckets.
   serviceAccountName: rasa-assistant
   serviceAccount:
@@ -68,13 +77,13 @@ rasa:
       eventBroker:
         enabled: true
         type: kafka
-        security_protocol: SASL_PLAINTEXT
-        sasl_mechanism: PLAIN
+        security_protocol: SASL_SSL
+        sasl_mechanism: OAUTHBEARER
         topic: rasa
-        url: kafka-controller-headless.${NAMESPACE}.svc.cluster.local:9092
-        sasl_username: ${KAFKA_USER}
-        sasl_password: ${KAFKA_PASSWORD}
-        ssl_check_hostname: false
+        url: ${KAFKA_BOOTSTRAP_SERVER}
+        ssl_check_hostname: true
+        ssl_cafile: AmazonRootCA1.pem
+        partition_by_sender: true
   # We'll configure Rasa to use Google Cloud Storage for remote storage, so we can load models from the buckets we created earlier.
   additionalArgs:
     - --remote-storage
@@ -102,17 +111,12 @@ rasa:
       value: ${DB_ASSISTANT_DATABASE}
     - name: DB_USER
       value: assistant
-    - name: KAFKA_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: rasa-secrets
-          key: kafkaSslPassword
-    - name: KAFKA_USER
-      value: kafka
     - name: REDIS_HOST
       value: ${REDIS_HOST}
     - name: REDIS_USER
       value: ${REDIS_USER}
+    - name: KAFKA_BOOTSTRAP_SERVER
+      value: ${KAFKA_BOOTSTRAP_SERVER}
     - name: AWS_ELASTICACHE_CLUSTER_NAME
       value: ${REDIS_CLUSTER_NAME}
     - name: RASA_PRO_LICENSE

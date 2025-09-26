@@ -28,14 +28,12 @@ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --ver
 print_info "Creating secrets for the Rasa assistant to use..."
 export AUTH_TOKEN=$(openssl rand -hex 8 | base64)
 export JWT_SECRET=$(openssl rand -hex 8 | base64)
-export KAFKA_CLIENT_PASSWORD=$(kubectl get secret kafka-user-passwords -n $NAMESPACE -o jsonpath='{.data.client-passwords}' | base64 -d | cut -d ',' -f 1)
 export RASA_PRO_LICENSE=${RASA_PRO_LICENSE:-'Rasa License is not set! Set it manually with `export RASA_PRO_LICENSE=yourlicense`'}
 export OPENAI_API_KEY=${OPENAI_API_KEY:-'OpenAI API Key is not set! Set it manually with `export OPENAI_API_KEY=yourkey`'}
 
 print_info "Secret values retrieved. If any of the values below are not set, be sure to set them manually and re-run this script."
 print_info "AUTH_TOKEN: $AUTH_TOKEN"
 print_info "JWT_SECRET: $JWT_SECRET"
-print_info "KAFKA_CLIENT_PASSWORD: $KAFKA_CLIENT_PASSWORD"
 print_info "RASA_PRO_LICENSE: $RASA_PRO_LICENSE"
 print_info "OPENAI_API_KEY: $OPENAI_API_KEY"
 
@@ -45,5 +43,7 @@ create secret generic rasa-secrets \
 --from-literal=rasaProLicense="$(echo $RASA_PRO_LICENSE )" \
 --from-literal=authToken="$(echo $AUTH_TOKEN )" \
 --from-literal=jwtSecret="$(echo $JWT_SECRET)" \
---from-literal=kafkaSslPassword="$(echo $KAFKA_CLIENT_PASSWORD)" \
 --from-literal=openaiApiKey="$(echo $OPENAI_API_KEY)"
+
+kubectl --namespace $NAMESPACE create secret generic msk-ssl-ca --from-file=$SCRIPT_DIR/aws/rasa/assistant/AmazonRootCA1.pem
+print_info "Kubernetes secret created successfully!"

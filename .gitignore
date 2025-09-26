@@ -45,3 +45,4 @@ secret_db.json
 
 # Dev
 aws/setup/environment-variables-dev.sh
+AmazonRootCA1.pem
