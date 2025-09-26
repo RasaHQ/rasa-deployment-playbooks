@@ -82,7 +82,7 @@ rasa:
         topic: rasa
         url: ${KAFKA_BOOTSTRAP_SERVER}
         ssl_check_hostname: true
-        ssl_cafile: AmazonRootCA1.pem
+        ssl_cafile: /app/AmazonRootCA1.pem
         partition_by_sender: true
   # We'll configure Rasa to use Google Cloud Storage for remote storage, so we can load models from the buckets we created earlier.
   additionalArgs:
