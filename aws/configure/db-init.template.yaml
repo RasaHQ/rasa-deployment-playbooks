@@ -43,7 +43,7 @@ spec:
         - name: PGUSER
           value: $DB_ROOT_UN
         - name: PGPASSWORD
-          value: $DB_ROOT_PW
+          value: "$DB_ROOT_PW"
         - name: PGPORT
           value: "$DB_PORT"
   restartPolicy: Never
