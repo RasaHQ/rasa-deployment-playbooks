@@ -97,11 +97,11 @@ rasa:
   additionalEnv:
     - name: IAM_CLOUD_PROVIDER
       value: aws
+    - name: RDS_SQL_DB_AWS_IAM_ENABLED
+      value: "true"
     - name: ELASTICACHE_REDIS_AWS_IAM_ENABLED
       value: "true"
     - name: KAFKA_MSK_AWS_IAM_ENABLED
-      value: "true"
-    - name: RDS_SQL_DB_AWS_IAM_ENABLED
       value: "true"
     - name: AWS_DEFAULT_REGION
       value: ${AWS_REGION}
