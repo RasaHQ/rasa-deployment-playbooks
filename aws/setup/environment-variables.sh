@@ -51,6 +51,10 @@ export DB_STUDIO_DATABASE="studio"
 export DB_STUDIO_USERNAME="studio"
 # The database name for Keycloak.
 export DB_KEYCLOAK_DATABASE="keycloak"
+# The database name for analytics.
+export DB_ANALYTICS_DATABASE="analytics"
+# The username for the analytics database.
+export DB_ANALYTICS_USERNAME="analytics"
 # The version of PostgreSQL Container to use for applying some configuration to the database.
 export PG_VERSION=17
 # The username for the ElastiCache Redis IAM role.
@@ -102,7 +106,9 @@ echo "DB assistant username:  $DB_ASSISTANT_USERNAME"
 echo "DB studio database:     $DB_STUDIO_DATABASE"
 echo "DB studio username:     $DB_STUDIO_USERNAME"
 echo "DB keycloak database:   $DB_KEYCLOAK_DATABASE"
-echo "Redis user:             $REDIS_USER"
+echo "DB analytics database:  $DB_ANALYTICS_DATABASE"
+echo "DB analytics username:  $DB_ANALYTICS_USERNAME"
 echo "PostgreSQL version:     $PG_VERSION"
+echo "Redis user:             $REDIS_USER"
 echo "--------------------------------"
 echo "If any of the above values are incorrect or blank, please update the file and re-run."

@@ -140,7 +140,72 @@ rasa:
 # Disable other Rasa components for now.
 # https://rasa.com/docs/reference/integrations/analytics/
 rasaProServices:
-  enabled: false
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro-services"
+    pullPolicy: IfNotPresent
+    tag: "3.6.0rc1"
+  volumeMounts:
+    - name: amazon-root-ca
+      mountPath: /app/AmazonRootCA1.pem
+      subPath: AmazonRootCA1.pem
+      readOnly: true
+  volumes:
+    - name: amazon-root-ca
+      secret:
+        secretName: msk-ssl-ca
+  service:
+    type: ClusterIP
+    port: 8732
+    targetPort: 8732
+  environmentVariables:
+    IAM_CLOUD_PROVIDER:
+      value: aws
+    AWS_DEFAULT_REGION:
+      value: ${AWS_REGION}
+    RDS_SQL_DB_AWS_IAM_ENABLED:
+      value: "true"
+    KAFKA_MSK_AWS_IAM_ENABLED:
+      value: "true"
+    # Address of the Kafka broker.
+    KAFKA_BROKER_ADDRESS:
+      value: ${KAFKA_BOOTSTRAP_SERVER}
+    # Topic Rasa Plus publishes events to and Rasa Pro consumes from
+    KAFKA_TOPIC:
+      value: "rasa"
+    # SASL mechanism to use for authentication.
+    KAFKA_SASL_MECHANISM:
+      value: "OAUTHBEARER"
+    # Security protocol to use for communication with Kafka
+    KAFKA_SECURITY_PROTOCOL:
+      value: "SASL_SSL"
+    # Filepath for SSL CA Certificate that will be used to connect with Kafka
+    KAFKA_SSL_CA_LOCATION:
+      value: "AmazonRootCA1.pem"
+    RASA_ANALYTICS_DLQ:
+      value: "rasa-events-dlq"
+    RASA_ANALYTICS_DB_HOST_NAME:
+      value: ${DB_HOST}
+    RASA_ANALYTICS_DB_NAME:
+      value: ${DB_ANALYTICS_DATABASE}
+    RASA_ANALYTICS_DB_USER:
+      value: ${DB_ANALYTICS_USERNAME}
+    RASA_ANALYTICS_DB_PORT:
+      value: ${DB_PORT}
+    RASA_ANALYTICS_DB_SSL_MODE:
+      value: "require"
+    RASA_PRO_LICENSE:
+      valueFrom:
+        secretKeyRef:
+          name: rasa-secrets
+          key: rasaProLicense
+    LOGGING_LEVEL:
+      value: "DEBUG"
+    PORT:
+      value: "8732"
+    KAFKA_SASL_PASSWORD:
+      value: ""
 # https://rasa.com/docs/action-server
 actionServer:
   enabled: false
