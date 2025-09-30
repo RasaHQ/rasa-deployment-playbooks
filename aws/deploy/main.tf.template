@@ -550,9 +550,9 @@ module "iam_role_assistant" {
   role_name = "${NAME}-assistant"
 
   role_policy_arns = {
-    s3_policy   = aws_iam_policy.assistant.arn
-    redis_policy = aws_iam_policy.redis_access.arn
-    rds_policy  = aws_iam_policy.rds_database_access.arn
+    s3   = aws_iam_policy.assistant.arn
+    redis = aws_iam_policy.redis_access.arn
+    rds  = aws_iam_policy.rds_database_access.arn
   }
   
   oidc_providers = {
