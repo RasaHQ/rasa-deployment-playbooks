@@ -24,7 +24,7 @@ export RASA_PRO_LICENSE="Your Rasa Pro license string here"
 # Your OpenAI API Key.
 export OPENAI_API_KEY="Your OpenAI API Key here"
 # The name of the model that will be uploaded to the model bucket as an initial model.
-export MODEL_PATH="20250906-111232-foggy-spaniel.tar.gz"
+export MODEL_PATH="20250924-160621-succulent-ravelin.tar.gz"
 #--------------------------------
 
 # You can optionally change the following environment variables if you have specific requirements
