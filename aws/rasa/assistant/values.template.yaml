@@ -3,7 +3,7 @@ rasa:
   image:
     repository: "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"
     pullPolicy: IfNotPresent
-    tag: "3.14.0.dev20250922"
+    tag: "3.14.0rc2"
   # Configure the service account which allows Rasa to interact with AWS resources like reading data from Cloud Storage buckets.
   serviceAccountName: rasa-assistant
   serviceAccount:
@@ -80,7 +80,7 @@ rasa:
     - --remote-storage
     - aws
     - --model
-    - 20250924-160621-succulent-ravelin.tar.gz
+    - ${MODEL_PATH}
     - --debug
     - --enable-api
   # Define the environment variables that Rasa needs to function and interact with the above services.
@@ -100,6 +100,8 @@ rasa:
       value: production
     - name: BUCKET_NAME
       value: ${MODEL_BUCKET}
+    - name: MODEL_PATH
+      value: ${MODEL_PATH}
     - name: DB_HOST
       value: ${DB_HOST}
     - name: DB_DATABASE
