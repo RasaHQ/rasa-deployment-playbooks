@@ -23,8 +23,8 @@ export DB_STUDIO_PASSWORD="your-studio-db-password"
 export RASA_PRO_LICENSE="Your Rasa Pro license string here"
 # Your OpenAI API Key.
 export OPENAI_API_KEY="Your OpenAI API Key here"
-# The name of the model to be uploaded to the model bucket as an initial model.
-export MODEL_PATH="model.tar.gz"
+# The name of the model that will be uploaded to the model bucket as an initial model.
+export MODEL_PATH="20250924-160621-succulent-ravelin.tar.gz"
 #--------------------------------
 
 # You can optionally change the following environment variables if you have specific requirements
@@ -54,7 +54,7 @@ export DB_KEYCLOAK_DATABASE="keycloak"
 # The version of PostgreSQL Container to use for applying some configuration to the database.
 export PG_VERSION=17
 # The username for the ElastiCache Redis IAM role.
-export REDIS_USER="${NAME}-redis-user"
+export REDIS_USER="assistant"
 #--------------------------------
 
 # You almost certainly don't need to change the following environment variables which define the network architecture of the deployment.

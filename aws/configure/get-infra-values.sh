@@ -27,6 +27,7 @@ export DB_HOST="${DB_HOST%:$DB_PORT}"
 
 export REDIS_HOST=$($TF_CMD -chdir=$TARGET_DIR_ABSOLUTE output -raw elasticache_cfg_endpoint)
 export REDIS_CLUSTER_NAME=$($TF_CMD -chdir=$TARGET_DIR_ABSOLUTE output -raw elasticache_cluster_name)
+
 export KAFKA_BOOTSTRAP_SERVER=$($TF_CMD -chdir=$TARGET_DIR_ABSOLUTE output -raw msk_bootstrap_brokers | awk -F',' '{print $1}')
 
 export SERVICE_ACCOUNT_DNS=$($TF_CMD -chdir=$TARGET_DIR_ABSOLUTE output -raw service_account_dns)
@@ -40,8 +41,8 @@ echo "DB_ROOT_PW=$DB_ROOT_PW"
 echo "DB_PORT=$DB_PORT"
 echo "DB_HOST=$DB_HOST"
 echo "REDIS_HOST=$REDIS_HOST"
+echo "REDIS_CLUSTER_NAME=$REDIS_CLUSTER_NAME"
 echo "SERVICE_ACCOUNT_DNS=$SERVICE_ACCOUNT_DNS"
 echo "SERVICE_ACCOUNT_ASSISTANT=$SERVICE_ACCOUNT_ASSISTANT"
 echo "SERVICE_ACCOUNT_STUDIO=$SERVICE_ACCOUNT_STUDIO"
-echo "REDIS_CLUSTER_NAME=$REDIS_CLUSTER_NAME"
 echo "KAFKA_BOOTSTRAP_SERVER=$KAFKA_BOOTSTRAP_SERVER"

@@ -3,7 +3,7 @@ rasa:
   image:
     repository: "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"
     pullPolicy: IfNotPresent
-    tag: "3.14.0.dev20250922"
+    tag: "3.14.0rc2"
   volumeMounts:
     - name: amazon-root-ca
       mountPath: /app/AmazonRootCA1.pem
@@ -89,7 +89,7 @@ rasa:
     - --remote-storage
     - aws
     - --model
-    - 20250924-160621-succulent-ravelin.tar.gz
+    - ${MODEL_PATH}
     - --debug
     - --enable-api
   # Define the environment variables that Rasa needs to function and interact with the above services.
@@ -111,6 +111,8 @@ rasa:
       value: production
     - name: BUCKET_NAME
       value: ${MODEL_BUCKET}
+    - name: MODEL_PATH
+      value: ${MODEL_PATH}
     - name: DB_HOST
       value: ${DB_HOST}
     - name: DB_DATABASE
@@ -121,10 +123,10 @@ rasa:
       value: ${REDIS_HOST}
     - name: REDIS_USER
       value: ${REDIS_USER}
-    - name: KAFKA_BOOTSTRAP_SERVER
-      value: ${KAFKA_BOOTSTRAP_SERVER}
     - name: AWS_ELASTICACHE_CLUSTER_NAME
       value: ${REDIS_CLUSTER_NAME}
+    - name: KAFKA_BOOTSTRAP_SERVER
+      value: ${KAFKA_BOOTSTRAP_SERVER}
     - name: RASA_PRO_LICENSE
       valueFrom:
         secretKeyRef:
