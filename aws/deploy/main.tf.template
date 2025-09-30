@@ -769,7 +769,8 @@ resource "aws_iam_policy" "rds_database_access" {
           "rds-db:connect"
         ]
         Resource = [
-          "arn:aws:rds-db:${REGION}:${data.aws_caller_identity.current.account_id}:dbuser:${module.rds_main.db_instance_resource_id}/${DB_ASSISTANT_USERNAME}"
+          "arn:aws:rds-db:${REGION}:${data.aws_caller_identity.current.account_id}:dbuser:${module.rds_main.db_instance_resource_id}/${DB_ASSISTANT_USERNAME}",
+          "arn:aws:rds-db:${REGION}:${data.aws_caller_identity.current.account_id}:dbuser:${module.rds_main.db_instance_resource_id}/${DB_ANALYTICS_USERNAME}"
         ]
       },
     ]

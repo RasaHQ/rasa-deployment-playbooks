@@ -22,7 +22,7 @@ kubectl get ns
 # This Helm chart contains instructions for setting up the Rasa bot and Analytics components.
 print_info "Pulling Rasa Helm chart..."
 mkdir $SCRIPT_DIR/repos
-helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.2.5 --untar --destination $SCRIPT_DIR/repos/rasa-helm
+helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.2.8-rc.2 --untar --destination $SCRIPT_DIR/repos/rasa-helm
 
 # Next, we'll ensure that other passwords and secret values that Rasa requires are set, before creating a Kubernetes Secret to securely store them in a way that we can reference later on:
 print_info "Creating secrets for the Rasa assistant to use..."

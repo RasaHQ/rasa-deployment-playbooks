@@ -160,14 +160,6 @@ rasaProServices:
     port: 8732
     targetPort: 8732
   environmentVariables:
-    IAM_CLOUD_PROVIDER:
-      value: aws
-    AWS_DEFAULT_REGION:
-      value: ${AWS_REGION}
-    RDS_SQL_DB_AWS_IAM_ENABLED:
-      value: "true"
-    KAFKA_MSK_AWS_IAM_ENABLED:
-      value: "true"
     # Address of the Kafka broker.
     KAFKA_BROKER_ADDRESS:
       value: ${KAFKA_BOOTSTRAP_SERVER}
@@ -185,27 +177,34 @@ rasaProServices:
       value: "AmazonRootCA1.pem"
     RASA_ANALYTICS_DLQ:
       value: "rasa-events-dlq"
-    RASA_ANALYTICS_DB_HOST_NAME:
-      value: ${DB_HOST}
-    RASA_ANALYTICS_DB_NAME:
-      value: ${DB_ANALYTICS_DATABASE}
-    RASA_ANALYTICS_DB_USER:
-      value: ${DB_ANALYTICS_USERNAME}
-    RASA_ANALYTICS_DB_PORT:
-      value: ${DB_PORT}
-    RASA_ANALYTICS_DB_SSL_MODE:
-      value: "require"
-    RASA_PRO_LICENSE:
-      valueFrom:
-        secretKeyRef:
-          name: rasa-secrets
-          key: rasaProLicense
     LOGGING_LEVEL:
       value: "DEBUG"
     PORT:
       value: "8732"
-    KAFKA_SASL_PASSWORD:
-      value: ""
+  additionalEnv:
+    - name: IAM_CLOUD_PROVIDER
+      value: aws
+    - name: AWS_DEFAULT_REGION
+      value: ${AWS_REGION}
+    - name: RDS_SQL_DB_AWS_IAM_ENABLED
+      value: "true"
+    - name: KAFKA_MSK_AWS_IAM_ENABLED
+      value: "true"
+    - name: RASA_ANALYTICS_DB_HOST_NAME
+      value: ${DB_HOST}
+    - name: RASA_ANALYTICS_DB_NAME
+      value: ${DB_ANALYTICS_DATABASE}
+    - name: RASA_ANALYTICS_DB_USERNAME
+      value: ${DB_ANALYTICS_USERNAME}
+    - name: RASA_ANALYTICS_DB_PORT
+      value: "${DB_PORT}"
+    - name: RASA_ANALYTICS_DB_SSL_MODE
+      value: "require"
+    - name: RASA_PRO_LICENSE
+      valueFrom:
+        secretKeyRef:
+          name: rasa-secrets
+          key: rasaProLicense
 # https://rasa.com/docs/action-server
 actionServer:
   enabled: false
