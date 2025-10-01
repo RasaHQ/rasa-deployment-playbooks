@@ -159,6 +159,12 @@ rasaProServices:
     type: ClusterIP
     port: 8732
     targetPort: 8732
+  serviceAccountName: rasa-analytics
+  serviceAccount:
+    create: true
+    name: rasa-analytics
+    annotations:
+      eks.amazonaws.com/role-arn: ${SERVICE_ACCOUNT_ANALYTICS}
   environmentVariables:
     # Address of the Kafka broker.
     KAFKA_BROKER_ADDRESS:
