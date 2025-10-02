@@ -23,8 +23,6 @@ export DB_STUDIO_PASSWORD="your-studio-db-password"
 export RASA_PRO_LICENSE="Your Rasa Pro license string here"
 # Your OpenAI API Key.
 export OPENAI_API_KEY="Your OpenAI API Key here"
-# Change this to the name of the model that you will upload to the model S3 bucket as an initial model.
-export MODEL_PATH="20250906-111232-foggy-spaniel.tar.gz"
 #--------------------------------
 
 # You can optionally change the following environment variables if you have specific requirements

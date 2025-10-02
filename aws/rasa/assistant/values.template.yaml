@@ -1,9 +1,5 @@
 rasa:
   enabled: true
-  image:
-    repository: "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"
-    pullPolicy: IfNotPresent
-    tag: "3.14.0rc2"
   # Configure the service account which allows Rasa to interact with AWS resources like reading data from Cloud Storage buckets.
   serviceAccountName: rasa-assistant
   serviceAccount:
@@ -70,15 +66,13 @@ rasa:
   additionalArgs:
     - --remote-storage
     - aws
-    - --model
-    - ${MODEL_PATH}
-    - --debug
-    - --enable-api
   # Define the environment variables that Rasa needs to function and interact with the above services.
   # Note here that some of the values are plaintext environment variables and some are configured to be pulled from the Kubernetes Secret we created earlier.
   additionalEnv:
     - name: IAM_CLOUD_PROVIDER
       value: aws
+    - name: ELASTICACHE_REDIS_AWS_IAM_ENABLED
+      value: "true"
     - name: RDS_SQL_DB_AWS_IAM_ENABLED
       value: "true"
     - name: AWS_DEFAULT_REGION
