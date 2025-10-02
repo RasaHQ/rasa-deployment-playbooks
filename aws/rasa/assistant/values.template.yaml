@@ -140,7 +140,60 @@ rasa:
 # Disable other Rasa components for now.
 # https://rasa.com/docs/reference/integrations/analytics/
 rasaProServices:
-  enabled: false
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro-services"
+    pullPolicy: IfNotPresent
+    tag: "3.6.0rc1"
+  volumeMounts:
+    - name: amazon-root-ca
+      mountPath: /app/AmazonRootCA1.pem
+      subPath: AmazonRootCA1.pem
+      readOnly: true
+  volumes:
+    - name: amazon-root-ca
+      secret:
+        secretName: msk-ssl-ca
+  service:
+    type: ClusterIP
+    port: 8732
+    targetPort: 8732
+  serviceAccountName: rasa-analytics
+  serviceAccount:
+    create: true
+    name: rasa-analytics
+    annotations:
+      eks.amazonaws.com/role-arn: ${SERVICE_ACCOUNT_ANALYTICS}
+  loggingLevel: "DEBUG"
+  useCloudProviderIam:
+    enabled: true
+    provider: "aws"
+    region: "${AWS_REGION}"
+  database:
+    enableAwsRdsIam: true
+    username: ${DB_ANALYTICS_USERNAME}
+    hostname: ${DB_HOST}
+    port: ${DB_PORT}
+    databaseName: ${DB_ANALYTICS_DATABASE}
+    sslMode: "require"
+  kafka:
+    enableAwsMskIam: true
+    brokerAddress: ${KAFKA_BOOTSTRAP_SERVER}
+    topic: "rasa"
+    dlqTopic: "rasa-events-dlq"
+    saslMechanism: "OAUTHBEARER"
+    securityProtocol: "SASL_SSL"
+    sslCaLocation: "AmazonRootCA1.pem"
+  additionalEnv:
+    - name: RASA_PRO_LICENSE
+      valueFrom:
+        secretKeyRef:
+          name: rasa-secrets
+          key: rasaProLicense
+    - name: PORT
+      value: "8732"
+
 # https://rasa.com/docs/action-server
 actionServer:
   enabled: false

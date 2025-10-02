@@ -680,7 +680,8 @@ resource "aws_iam_policy" "rds_database_access" {
           "rds-db:connect"
         ]
         Resource = [
-          "arn:aws:rds-db:${REGION}:${data.aws_caller_identity.current.account_id}:dbuser:${module.rds_main.db_instance_resource_id}/${DB_ASSISTANT_USERNAME}"
+          "arn:aws:rds-db:${REGION}:${data.aws_caller_identity.current.account_id}:dbuser:${module.rds_main.db_instance_resource_id}/${DB_ASSISTANT_USERNAME}",
+          "arn:aws:rds-db:${REGION}:${data.aws_caller_identity.current.account_id}:dbuser:${module.rds_main.db_instance_resource_id}/${DB_ANALYTICS_USERNAME}"
         ]
       },
     ]
@@ -772,6 +773,33 @@ locals {
 
 output "service_account_assistant" {
   value = local.service_account_assistant
+}
+
+module "iam_role_analytics" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "~> 5.59"
+
+  role_name = "${NAME}-analytics"
+
+  role_policy_arns = {
+    rds  = aws_iam_policy.rds_database_access.arn
+    msk = aws_iam_policy.msk_access.arn
+  }
+
+  oidc_providers = {
+    rasa = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["${NAMESPACE}:rasa-analytics"]
+    }
+  }
+}
+
+locals {
+  service_account_analytics = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${module.iam_role_analytics.iam_role_name}"
+}
+
+output "service_account_analytics" {
+  value = local.service_account_analytics
 }
 
 

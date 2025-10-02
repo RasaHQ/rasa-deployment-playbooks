@@ -22,7 +22,7 @@ kubectl get ns
 # This Helm chart contains instructions for setting up the Rasa bot and Analytics components.
 print_info "Pulling Rasa Helm chart..."
 mkdir $SCRIPT_DIR/repos
-helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.2.5 --untar --destination $SCRIPT_DIR/repos/rasa-helm
+helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.3.0-rc.2 --untar --destination $SCRIPT_DIR/repos/rasa-helm
 
 # Next, we'll ensure that other passwords and secret values that Rasa requires are set, before creating a Kubernetes Secret to securely store them in a way that we can reference later on:
 print_info "Creating secrets for the Rasa assistant to use..."
@@ -45,5 +45,5 @@ create secret generic rasa-secrets \
 --from-literal=jwtSecret="$(echo $JWT_SECRET)" \
 --from-literal=openaiApiKey="$(echo $OPENAI_API_KEY)"
 
-kubectl --namespace $NAMESPACE create secret generic msk-ssl-ca --from-file=$SCRIPT_DIR/aws/rasa/assistant/AmazonRootCA1.pem
+kubectl --namespace $NAMESPACE create secret generic msk-ssl-ca --from-file=$SCRIPT_DIR/AmazonRootCA1.pem
 print_info "Kubernetes secret created successfully!"
