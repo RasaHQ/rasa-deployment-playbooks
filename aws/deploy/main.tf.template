@@ -502,7 +502,9 @@ output "service_account_dns" {
 
 # Rasa Assistent Identity =========================================
 
-resource "aws_iam_policy" "assistant" {
+# S3 IAM Access Policy
+
+resource "aws_iam_policy" "s3_access" {
   name        = "${NAME}_bucket_assistant"
   path        = "/"
   description = "Rasa ${NAME} bucket assistant"
@@ -523,6 +525,7 @@ resource "aws_iam_policy" "assistant" {
 }
 
 # Redis IAM Access Policy
+
 resource "aws_iam_policy" "redis_access" {
   name        = "${NAME}_redis_access"
   path        = "/"
@@ -542,6 +545,47 @@ resource "aws_iam_policy" "redis_access" {
   })
 }
 
+# RDS Database Access Policy
+
+resource "aws_iam_policy" "rds_database_access" {
+  name        = "${NAME}_rds_database_access"
+  path        = "/"
+  description = "Rasa ${NAME} RDS database access via IAM"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "rds-db:connect"
+        ]
+        Resource = [
+          "arn:aws:rds-db:${REGION}:${data.aws_caller_identity.current.account_id}:dbuser:${module.rds_main.db_instance_resource_id}/${DB_ASSISTANT_USERNAME}"
+        ]
+      },
+    ]
+  })
+}
+
+module "iam_role_rds_database" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "~> 5.59"
+
+  role_name = "${NAME}-rds-database"
+
+  role_policy_arns = {
+    policy = aws_iam_policy.rds_database_access.arn
+  }
+
+  oidc_providers = {
+    rasa = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["${NAMESPACE}:rasa-assistant"]
+    }
+  }
+}
+
 
 module "iam_role_assistant" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
@@ -550,7 +594,7 @@ module "iam_role_assistant" {
   role_name = "${NAME}-assistant"
 
   role_policy_arns = {
-    s3   = aws_iam_policy.assistant.arn
+    s3   = aws_iam_policy.s3_access.arn
     redis = aws_iam_policy.redis_access.arn
     rds  = aws_iam_policy.rds_database_access.arn
   }
@@ -592,47 +636,6 @@ resource "aws_iam_policy" "studio" {
       },
     ]
   })
-}
-
-# RDS Database Access Policy =========================================
-
-resource "aws_iam_policy" "rds_database_access" {
-  name        = "${NAME}_rds_database_access"
-  path        = "/"
-  description = "Rasa ${NAME} RDS database access via IAM"
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "rds-db:connect"
-        ]
-        Resource = [
-          "arn:aws:rds-db:${REGION}:${data.aws_caller_identity.current.account_id}:dbuser:${module.rds_main.db_instance_resource_id}/${DB_ASSISTANT_USERNAME}"
-        ]
-      },
-    ]
-  })
-}
-
-module "iam_role_rds_database" {
-  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "~> 5.59"
-
-  role_name = "${NAME}-rds-database"
-
-  role_policy_arns = {
-    policy = aws_iam_policy.rds_database_access.arn
-  }
-
-  oidc_providers = {
-    rasa = {
-      provider_arn               = module.eks.oidc_provider_arn
-      namespace_service_accounts = ["${NAMESPACE}:rasa-assistant"]
-    }
-  }
 }
 
 module "iam_role_studio" {

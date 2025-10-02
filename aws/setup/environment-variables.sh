@@ -3,7 +3,7 @@
 # You must change the following variables to match your environment
 #--------------------------------
 # Set the value of this to terraform if you've chosen to use Terraform for deployment or tofu if you've chosen to use OpenTofu for deployment.
-export TF_CMD=terraform
+export TF_CMD=tofu
 # Change this to the name of the AWS profile you want to use which you have configured in your ~/.aws/config file.
 export AWS_PROFILE=your-aws-profile-name
 # Change this to the AWS region you want to deploy to. Find the available regions here: https://docs.aws.amazon.com/global-infrastructure/latest/regions/aws-regions.html
@@ -23,7 +23,7 @@ export DB_STUDIO_PASSWORD="your-studio-db-password"
 export RASA_PRO_LICENSE="Your Rasa Pro license string here"
 # Your OpenAI API Key.
 export OPENAI_API_KEY="Your OpenAI API Key here"
-# The name of the model that will be uploaded to the model bucket as an initial model.
+# Change this to the name of the model that you will upload to the model S3 bucket as an initial model.
 export MODEL_PATH="20250906-111232-foggy-spaniel.tar.gz"
 #--------------------------------
 
