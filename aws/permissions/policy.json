@@ -8,7 +8,8 @@
                 "arn:aws:iam::*:role/aws-service-role/eks.amazonaws.com/AWSServiceRoleForAmazonEKS",
                 "arn:aws:iam::*:role/aws-service-role/eks-nodegroup.amazonaws.com/AWSServiceRoleForAmazonEKSNodegroup",
                 "arn:aws:iam::*:role/aws-service-role/elasticache.amazonaws.com/AWSServiceRoleForElastiCache",
-                "arn:aws:iam::*:role/aws-service-role/rds.amazonaws.com/AWSServiceRoleForRDS"
+                "arn:aws:iam::*:role/aws-service-role/rds.amazonaws.com/AWSServiceRoleForRDS",
+                "arn:aws:iam::*:role/aws-service-role/kafka.amazonaws.com/AWSServiceRoleForKafka"
             ]
         },
 		{
@@ -100,6 +101,7 @@
 				"elasticache:ModifyUser",
 				"elasticache:ModifyUserGroup",
                 "elasticache:Connect",
+                "kafka:*",
 				"iam:AttachRolePolicy",
 				"iam:CreateOpenIDConnectProvider",
 				"iam:CreatePolicy",
