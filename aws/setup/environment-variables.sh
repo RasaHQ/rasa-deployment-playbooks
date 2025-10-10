@@ -17,12 +17,8 @@ export DOMAIN=yourdomain.example.com
 export MY_EMAIL=email@example.com
 # Change this to the name of your company. This will be used to generate unique bucket names.
 export MY_COMPANY_NAME="rasa"
-# The password you'd like to use for the Rasa Pro database.
-export DB_ASSISTANT_PASSWORD="your-assistant-db-password"
 # The password you'd like to use for the Rasa Studio database.
 export DB_STUDIO_PASSWORD="your-studio-db-password"
-# The authentication string you'd like to use for Redis. This must be 16 to 128 alphanumeric characters.
-export REDIS_AUTH="changemechangeme123"
 # The license string for Rasa Pro.
 export RASA_PRO_LICENSE="Your Rasa Pro license string here"
 # Your OpenAI API Key.
@@ -55,6 +51,8 @@ export DB_STUDIO_USERNAME="studio"
 export DB_KEYCLOAK_DATABASE="keycloak"
 # The version of PostgreSQL Container to use for applying some configuration to the database.
 export PG_VERSION=17
+# The username for the ElastiCache Redis IAM role.
+export REDIS_USER="assistant"
 #--------------------------------
 
 # You almost certainly don't need to change the following environment variables which define the network architecture of the deployment.
@@ -85,7 +83,6 @@ echo "AWS Region:             $AWS_REGION"
 echo "Domain:                 $DOMAIN"
 echo "Let's Encrypt email:    $MY_EMAIL"
 echo "Company name:           $MY_COMPANY_NAME"
-echo "DB assistant password:  $DB_ASSISTANT_PASSWORD"
 echo "DB studio password:     $DB_STUDIO_PASSWORD"
 echo "Rasa Pro license:       $RASA_PRO_LICENSE"
 echo "OpenAI API key:         $OPENAI_API_KEY"
@@ -100,6 +97,7 @@ echo "DB assistant username:  $DB_ASSISTANT_USERNAME"
 echo "DB studio database:     $DB_STUDIO_DATABASE"
 echo "DB studio username:     $DB_STUDIO_USERNAME"
 echo "DB keycloak database:   $DB_KEYCLOAK_DATABASE"
+echo "Redis user:             $REDIS_USER"
 echo "PostgreSQL version:     $PG_VERSION"
 echo "--------------------------------"
 echo "If any of the above values are incorrect or blank, please update the file and re-run."
