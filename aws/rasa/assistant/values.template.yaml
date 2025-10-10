@@ -1,5 +1,18 @@
 rasa:
   enabled: true
+  image:
+    repository: "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"
+    pullPolicy: IfNotPresent
+    tag: "3.14.0rc2"
+  volumeMounts:
+    - name: amazon-root-ca
+      mountPath: /app/AmazonRootCA1.pem
+      subPath: AmazonRootCA1.pem
+      readOnly: true
+  volumes:
+    - name: amazon-root-ca
+      secret:
+        secretName: msk-ssl-ca
   # Configure the service account which allows Rasa to interact with AWS resources like reading data from Cloud Storage buckets.
   serviceAccountName: rasa-assistant
   serviceAccount:
@@ -64,13 +77,13 @@ rasa:
       eventBroker:
         enabled: true
         type: kafka
-        security_protocol: SASL_PLAINTEXT
-        sasl_mechanism: PLAIN
+        security_protocol: SASL_SSL
+        sasl_mechanism: OAUTHBEARER
         topic: rasa
-        url: kafka-controller-headless.${NAMESPACE}.svc.cluster.local:9092
-        sasl_username: ${KAFKA_USER}
-        sasl_password: ${KAFKA_PASSWORD}
-        ssl_check_hostname: false
+        url: ${KAFKA_BOOTSTRAP_SERVER}
+        ssl_check_hostname: true
+        ssl_cafile: AmazonRootCA1.pem
+        partition_by_sender: true
   # We'll configure Rasa to use Google Cloud Storage for remote storage, so we can load models from the buckets we created earlier.
   additionalArgs:
     - --remote-storage
@@ -88,6 +101,8 @@ rasa:
       value: "true"
     - name: RDS_SQL_DB_AWS_IAM_ENABLED
       value: "true"
+    - name: KAFKA_MSK_AWS_IAM_ENABLED
+      value: "true"
     - name: AWS_DEFAULT_REGION
       value: ${AWS_REGION}
     - name: SQL_TRACKER_STORE_SSL_MODE
@@ -96,25 +111,22 @@ rasa:
       value: production
     - name: BUCKET_NAME
       value: ${MODEL_BUCKET}
+    - name: MODEL_PATH
+      value: ${MODEL_PATH}
     - name: DB_HOST
       value: ${DB_HOST}
     - name: DB_DATABASE
       value: ${DB_ASSISTANT_DATABASE}
     - name: DB_USER
       value: assistant
-    - name: KAFKA_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: rasa-secrets
-          key: kafkaSslPassword
-    - name: KAFKA_USER
-      value: kafka
     - name: REDIS_HOST
       value: ${REDIS_HOST}
     - name: REDIS_USER
       value: ${REDIS_USER}
     - name: AWS_ELASTICACHE_CLUSTER_NAME
       value: ${REDIS_CLUSTER_NAME}
+    - name: KAFKA_BOOTSTRAP_SERVER
+      value: ${KAFKA_BOOTSTRAP_SERVER}
     - name: RASA_PRO_LICENSE
       valueFrom:
         secretKeyRef:
@@ -128,7 +140,60 @@ rasa:
 # Disable other Rasa components for now.
 # https://rasa.com/docs/reference/integrations/analytics/
 rasaProServices:
-  enabled: false
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro-services"
+    pullPolicy: IfNotPresent
+    tag: "3.6.0rc1"
+  volumeMounts:
+    - name: amazon-root-ca
+      mountPath: /app/AmazonRootCA1.pem
+      subPath: AmazonRootCA1.pem
+      readOnly: true
+  volumes:
+    - name: amazon-root-ca
+      secret:
+        secretName: msk-ssl-ca
+  service:
+    type: ClusterIP
+    port: 8732
+    targetPort: 8732
+  serviceAccountName: rasa-analytics
+  serviceAccount:
+    create: true
+    name: rasa-analytics
+    annotations:
+      eks.amazonaws.com/role-arn: ${SERVICE_ACCOUNT_ANALYTICS}
+  loggingLevel: "DEBUG"
+  useCloudProviderIam:
+    enabled: true
+    provider: "aws"
+    region: "${AWS_REGION}"
+  database:
+    enableAwsRdsIam: true
+    username: ${DB_ANALYTICS_USERNAME}
+    hostname: ${DB_HOST}
+    port: ${DB_PORT}
+    databaseName: ${DB_ANALYTICS_DATABASE}
+    sslMode: "require"
+  kafka:
+    enableAwsMskIam: true
+    brokerAddress: ${KAFKA_BOOTSTRAP_SERVER}
+    topic: "rasa"
+    dlqTopic: "rasa-events-dlq"
+    saslMechanism: "OAUTHBEARER"
+    securityProtocol: "SASL_SSL"
+    sslCaLocation: "AmazonRootCA1.pem"
+  additionalEnv:
+    - name: RASA_PRO_LICENSE
+      valueFrom:
+        secretKeyRef:
+          name: rasa-secrets
+          key: rasaProLicense
+    - name: PORT
+      value: "8732"
+
 # https://rasa.com/docs/action-server
 actionServer:
   enabled: false

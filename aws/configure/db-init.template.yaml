@@ -35,6 +35,13 @@ spec:
           echo "GRANT ALL PRIVILEGES ON SCHEMA public TO $DB_STUDIO_USERNAME;" | psql -qtAX --set=sslmode=require
           echo "granted schema public to keycloak"
 
+          echo "create analytics database and user"
+          echo "CREATE USER $DB_ANALYTICS_USERNAME;" | psql -qtAX --set=sslmode=require
+          echo "GRANT rds_iam TO $DB_ANALYTICS_USERNAME;" | psql -qtAX --set=sslmode=require
+          echo "CREATE DATABASE $DB_ANALYTICS_DATABASE WITH ENCODING = 'UTF8';" | psql -qtAX --set=sslmode=require
+          echo "GRANT ALL PRIVILEGES ON DATABASE $DB_ANALYTICS_DATABASE TO $DB_ANALYTICS_USERNAME;" | psql -qtAX --set=sslmode=require
+          echo "ALTER DATABASE $DB_ANALYTICS_DATABASE OWNER TO $DB_ANALYTICS_USERNAME;" | psql -qtAX --set=sslmode=require  
+
           sleep 10
           echo "done"
       env:

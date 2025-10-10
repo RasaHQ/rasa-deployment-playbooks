@@ -51,6 +51,10 @@ export DB_STUDIO_DATABASE="studio"
 export DB_STUDIO_USERNAME="studio"
 # The database name for Keycloak.
 export DB_KEYCLOAK_DATABASE="keycloak"
+# The database name for analytics.
+export DB_ANALYTICS_DATABASE="analytics"
+# The username for the analytics database.
+export DB_ANALYTICS_USERNAME="analytics"
 # The version of PostgreSQL Container to use for applying some configuration to the database.
 export PG_VERSION=17
 # The username for the ElastiCache Redis IAM role.
@@ -67,16 +71,19 @@ export CIDR_PUBLIC_A=10.100.4.0/22
 export CIDR_PRIVATE_A=10.100.8.0/21
 export CIDR_DB_A=10.100.16.0/21
 export CIDR_ELASTICACHE_A=10.100.24.0/21
+export CIDR_MSK_A=10.100.96.0/21
 
 export CIDR_PUBLIC_B=10.100.36.0/22
 export CIDR_PRIVATE_B=10.100.40.0/21
 export CIDR_DB_B=10.100.48.0/21
 export CIDR_ELASTICACHE_B=10.100.56.0/21
+export CIDR_MSK_B=10.100.104.0/21
 
 export CIDR_PUBLIC_C=10.100.68.0/22
 export CIDR_PRIVATE_C=10.100.72.0/21
 export CIDR_DB_C=10.100.80.0/21
 export CIDR_ELASTICACHE_C=10.100.88.0/21
+export CIDR_MSK_C=10.100.112.0/21
 #--------------------------------
 
 # Print the environment variables so you can see they're all set correctly.
@@ -99,7 +106,9 @@ echo "DB assistant username:  $DB_ASSISTANT_USERNAME"
 echo "DB studio database:     $DB_STUDIO_DATABASE"
 echo "DB studio username:     $DB_STUDIO_USERNAME"
 echo "DB keycloak database:   $DB_KEYCLOAK_DATABASE"
-echo "Redis user:             $REDIS_USER"
+echo "DB analytics database:  $DB_ANALYTICS_DATABASE"
+echo "DB analytics username:  $DB_ANALYTICS_USERNAME"
 echo "PostgreSQL version:     $PG_VERSION"
+echo "Redis user:             $REDIS_USER"
 echo "--------------------------------"
 echo "If any of the above values are incorrect or blank, please update the file and re-run."
