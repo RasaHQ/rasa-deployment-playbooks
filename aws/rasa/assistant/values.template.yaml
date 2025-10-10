@@ -83,8 +83,6 @@ rasa:
       value: production
     - name: BUCKET_NAME
       value: ${MODEL_BUCKET}
-    - name: MODEL_PATH
-      value: ${MODEL_PATH}
     - name: DB_HOST
       value: ${DB_HOST}
     - name: DB_DATABASE
