@@ -1,0 +1,75 @@
+config:
+  # -- Defines the host name for all the Studio ingress resources. Make sure you provide a valid host name.
+  ingressHost: &dns_hostname "studio.${DOMAIN}"
+  ingressAnnotations:
+    kubernetes.io/ingress.class: istio
+  ingressClassName: istio
+  # -- Define if you will be using https or http with the ingressHost
+  connectionType: "https"
+  # -- The postgres database instance details for Studio to connect to.
+  database:
+    # -- The database host name
+    host: ${DB_HOST}
+    # -- The database username
+    username: ${DB_STUDIO_USERNAME}
+backend:
+  # -- Configure the ingress resource that allows you to access the deployment installation.
+  ## ref: http://kubernetes.io/docs/user-guide/ingress/
+  ingress:
+    # -- ingress.tls spefices the TLS configuration for ingress
+    tls:
+      - secretName: ${NAME}-studio-tls
+        hosts:
+          - studio.${DOMAIN}
+eventIngestion:
+  environmentVariables:
+    KAFKA_BROKER_ADDRESS: 
+      value: kafka-kafka-bootstrap.${NAMESPACE}.svc.cluster.local:9092
+    KAFKA_SASL_MECHANISM:
+      value: SCRAM-SHA-512
+    KAFKA_SASL_USERNAME:
+      value: kafka
+    KAFKA_TOPIC:
+      value: rasa
+webClient:
+  ingress:
+    # -- ingress.tls spefices the TLS configuration for ingress
+    tls:
+      - secretName: ${NAME}-studio-tls
+        hosts:
+          - studio.${DOMAIN}
+keycloak:
+  ingress:
+    # -- ingress.tls spefices the TLS configuration for ingress
+    tls:
+      - secretName: ${NAME}-studio-tls
+        hosts:
+          - studio.${DOMAIN}
+rasa:
+  rasa:
+    additionalEnv:
+      - name: RASA_REMOTE_STORAGE
+        value: azure
+      - name: AZURE_CONTAINER
+        value: ${STUDIO_STORAGE_CONTAINER}
+      - name: AZURE_ACCOUNT_NAME
+        value: ${NAME}
+      - name: AZURE_ACCOUNT_KEY
+        valueFrom:
+          secretKeyRef:
+            name: studio-secrets
+            key: storageAccountKey
+    ingress:
+      className: istio
+      hosts:
+        # -- Please update the below URL with the correct host name of the Studio deployment
+        - host: *dns_hostname
+          paths:
+            - path: /talk
+              pathType: Prefix
+      tls:
+        - secretName: ${NAME}-studio-tls
+          hosts:
+            - studio.${DOMAIN}
+    persistence:
+      storageClassName: default

@@ -1,0 +1,12 @@
+crds:
+  enabled: true
+
+serviceAccount:
+  labels:
+    azure.workload.identity/use: "true"
+
+podLabels:
+  azure.workload.identity/use: "true"
+
+prometheus:
+  enabled: true

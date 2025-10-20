@@ -43,5 +43,30 @@ aws/studio/values.yaml
 aws/studio/certificate.yaml
 secret_db.json
 
+azure/deploy/_tf/*
+azure/deploy/.terraform/*
+azure/deploy/.terraform.lock.hcl
+azure/deploy/terraform.tfstate
+azure/deploy/terraform.tfstate.backup
+azure/configure/cert-manager-certificate-issuer.yaml
+azure/configure/cert-manager-values.yaml
+azure/configure/external-dns-secret.yaml
+azure/configure/external-dns-values.yaml
+azure/configure/test-ingress-certificate.yaml
+azure/configure/test-ingress-httpbin-values.yaml
+azure/configure/db-init.yaml
+azure/rasa/kafka/kafka.yaml
+azure/rasa/assistant/repos/*
+azure/rasa/assistant/values.yaml
+azure/rasa/ingress/ingress.yaml
+azure/rasa/ingress/certificate.yaml
+azure/studio/repos/*
+azure/studio/values.yaml
+azure/studio/certificate.yaml
+
+
+
 # Dev
+gcp/setup/environment-variables-dev.sh
 aws/setup/environment-variables-dev.sh
+azure/setup/environment-variables-dev.sh

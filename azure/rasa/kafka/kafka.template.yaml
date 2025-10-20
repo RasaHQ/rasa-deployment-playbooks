@@ -1,0 +1,92 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: $NAMESPACE
+  annotations:
+    strimzi.io/kraft: "enabled"
+    strimzi.io/node-pools: "enabled"
+spec:
+  kafka:
+    version: 3.9.1
+    listeners:
+      - name: plain
+        port: 9092
+        type: internal
+        tls: false
+        authentication:
+          type: scram-sha-512
+
+    config:
+
+      default.replication.factor: 2
+      offsets.topic.replication.factor: 2
+      transaction.state.log.replication.factor: 2
+      min.insync.replicas: 2
+      num.partitions: 1
+
+  entityOperator:
+    topicOperator: {}
+    userOperator: {}
+
+---
+# KafkaNodePool - Required for KRaft mode
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaNodePool
+metadata:
+  name: broker
+  namespace: $NAMESPACE
+  labels:
+    strimzi.io/cluster: kafka
+spec:
+  replicas: 3
+  roles:
+    - broker
+    - controller
+  storage:
+    type: persistent-claim
+    size: 8Gi
+    class: default
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaUser
+metadata:
+  name: kafka
+  namespace: $NAMESPACE
+  labels:
+    strimzi.io/cluster: kafka
+spec:
+  authentication:
+    type: scram-sha-512
+---
+# Pre-create Rasa topics
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: rasa
+  namespace: $NAMESPACE
+  labels:
+    strimzi.io/cluster: kafka
+spec:
+  partitions: 1
+  replicas: 2
+  config:
+    retention.ms: 604800000    # 7 days
+    segment.bytes: 1073741824  # 1GB
+    cleanup.policy: delete
+
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: rasa-events-dlq
+  namespace: $NAMESPACE
+  labels:
+    strimzi.io/cluster: kafka
+spec:
+  partitions: 1
+  replicas: 2
+  config:
+    retention.ms: 604800000   # 7 days
+    segment.bytes: 1073741824 # 1GB
+    cleanup.policy: delete
