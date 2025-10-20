@@ -2,17 +2,26 @@ echo "Fetching some infrastructure values..."
 
 # Authenticate with AWS Cluster
 echo "Generating kubeconfig to authenticate with AWS EKS cluster..."
-# To be able to interact with the EKS cluster we deployed earlier, we need to obtain the credentials for it. These credentials are saved in a file called kubeconfig which the AWS CLI can generate for us and kubectl can use.
+# To be able to interact with the EKS cluster we deployed earlier, we need to obtain the credentials for it.
+# These credentials are saved in a file called kubeconfig which the AWS CLI can generate for us and kubectl can use.
 # Ensure we've got a path setup for the kubeconfig file:
 export KUBECONFIG=$(pwd)/kubeconfig
 echo "Kubeconfig path:  $KUBECONFIG"
 rm -f $KUBECONFIG
-#Retrieve the credentials for the cluster using the AWS CLI:
+# Retrieve the credentials for the cluster using the AWS CLI:
 aws eks update-kubeconfig --region $REGION --name $NAME
 
 # Get the directory where this script is located
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TARGET_DIR_RELATIVE="$SCRIPT_DIR/aws/deploy/_tf"
+# It also works when sourced from zsh
+if [[ -n "${BASH_SOURCE[0]}" ]]; then
+    SOURCE_PATH="${BASH_SOURCE[0]}"
+else
+    # For zsh compatibility
+    SOURCE_PATH="${(%):-%x}"
+fi
+
+SCRIPT_DIR="$(cd "$(dirname "$SOURCE_PATH")" && pwd)"
+TARGET_DIR_RELATIVE="$SCRIPT_DIR/../deploy/_tf"
 TARGET_DIR_ABSOLUTE=$(realpath "$TARGET_DIR_RELATIVE")
 
 export DB_SECRET_ID=$($TF_CMD -chdir=$TARGET_DIR_ABSOLUTE output -raw secret_id_db)

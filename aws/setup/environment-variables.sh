@@ -35,8 +35,6 @@ export BUCKET_NAME_ENTROPY="xbuc"
 export MODEL_BUCKET="${MY_COMPANY_NAME}-${BUCKET_NAME_ENTROPY}-${NAME}-model"
 # The name of the bucket used to store models for Rasa Studio.
 export STUDIO_BUCKET="${MY_COMPANY_NAME}-${BUCKET_NAME_ENTROPY}-${NAME}-studio"
-# Process your domain name to create a DNS zone name for Amazon Route 53.
-export DNS_ZONE=$(echo "$DOMAIN" | sed -e 's/\./-/g')
 # The Kubernetes namespace that will be used for the deployment.
 export NAMESPACE=rasa
 # The database name for Rasa Pro.

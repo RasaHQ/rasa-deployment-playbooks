@@ -62,7 +62,7 @@ rasa:
         sasl_username: ${KAFKA_USER}
         sasl_password: ${KAFKA_PASSWORD}
         ssl_check_hostname: false
-  # We'll configure Rasa to use Google Cloud Storage for remote storage, so we can load models from the buckets we created earlier.
+  # We'll configure Rasa to use AWS for remote storage, so we can load models from the buckets we created earlier.
   additionalArgs:
     - --remote-storage
     - aws
