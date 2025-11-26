@@ -16,8 +16,6 @@ export REGION=eastus2
 export DOMAIN=yourdomain.example.com
 # Change this to the email address you'll use to request TLS certificates from Let's Encrypt.
 export MY_EMAIL=email@example.com
-# Change this to the name of your company. This will be used to generate unique bucket names.
-export MY_COMPANY_NAME="rasa"
 # The password you'd like to use for the Rasa Pro database.
 export DB_ASSISTANT_PASSWORD="your-assistant-db-password"
 # The password you'd like to use for the Rasa Studio database.
@@ -75,13 +73,11 @@ echo "Azure Subscription ID:       $ARM_SUBSCRIPTION_ID"
 echo "Azure Region:                $REGION"
 echo "Domain:                      $DOMAIN"
 echo "Let's Encrypt email:         $MY_EMAIL"
-echo "Company name:                $MY_COMPANY_NAME"
 echo "DB assistant password:       $DB_ASSISTANT_PASSWORD"
 echo "DB studio password:          $DB_STUDIO_PASSWORD"
 echo "DB keycloak password:        $DB_KEYCLOAK_PASSWORD"
 echo "Rasa Pro license:            $RASA_PRO_LICENSE"
 echo "OpenAI API key:              $OPENAI_API_KEY"
-echo "Bucket name entropy:         $BUCKET_NAME_ENTROPY"
 echo "Assistant storage container: $ASSISTANT_STORAGE_CONTAINER"
 echo "Studio storage container:    $STUDIO_STORAGE_CONTAINER"
 echo "Deployment name prefix:      $NAME"

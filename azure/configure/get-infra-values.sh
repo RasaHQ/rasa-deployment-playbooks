@@ -13,16 +13,15 @@ az aks get-credentials --resource-group "$NAME" --name "$NAME"
 
 # Get the directory where this script is located
 # It also works when sourced from zsh
-if [[ -n "${BASH_SOURCE[0]}" ]]; then
-    SOURCE_PATH="${BASH_SOURCE[0]}"
+if [ -n "${BASH_SOURCE:-}" ]; then
+  SCRIPT_SOURCE="${BASH_SOURCE[0]}"
+elif [ -n "${ZSH_VERSION:-}" ]; then
+  SCRIPT_SOURCE="${(%):-%N}"
 else
-    # For zsh compatibility
-    SOURCE_PATH="${(%):-%x}"
+  SCRIPT_SOURCE="$0"
 fi
-
-SCRIPT_DIR="$(cd "$(dirname "$SOURCE_PATH")" && pwd)"
-TARGET_DIR_RELATIVE="$SCRIPT_DIR/../deploy/_tf"
-TARGET_DIR_ABSOLUTE=$(realpath "$TARGET_DIR_RELATIVE")
+SCRIPT_DIR="$(cd -- "$(dirname -- "$SCRIPT_SOURCE")" >/dev/null 2>&1 && pwd)"
+TARGET_DIR_ABSOLUTE="$SCRIPT_DIR/../deploy/_tf"
 
 export DB_ROOT_UN=postgres
 export DB_ROOT_PW=$($TF_CMD -chdir=$TARGET_DIR_ABSOLUTE output -raw pg_main_pw)
