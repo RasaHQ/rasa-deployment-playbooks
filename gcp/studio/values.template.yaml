@@ -98,3 +98,5 @@ rasa:
         - secretName: ${NAME}-studio-tls
           hosts:
             - studio.${DOMAIN}
+    persistence:
+      storageClassName: standard-rwo
