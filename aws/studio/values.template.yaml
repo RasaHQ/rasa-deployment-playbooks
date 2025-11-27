@@ -96,3 +96,5 @@ rasa:
         - secretName: ${NAME}-studio-tls
           hosts:
             - studio.${DOMAIN}
+    persistence:
+      storageClassName: auto-ebs-sc
