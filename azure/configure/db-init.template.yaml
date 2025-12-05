@@ -13,36 +13,51 @@ spec:
         - "--"
       args:
         - |
-          echo "create assistant database and user"
+          echo "create assistant database"
+          psql -qtAX --set ON_ERROR_STOP=on <<'EOF'
+          CREATE DATABASE "$DB_ASSISTANT_DATABASE" WITH ENCODING = 'UTF8';
+          EOF
+          
+          echo "create assistant user"
           psql -qtAX --set ON_ERROR_STOP=on <<'EOF'
           CREATE USER "$DB_ASSISTANT_USERNAME" WITH PASSWORD '$DB_ASSISTANT_PASSWORD';
-          CREATE DATABASE "$DB_ASSISTANT_DATABASE" WITH ENCODING = 'UTF8';
+          EOF
+          
+          echo "grant privileges to assistant database"
+          psql -qtAX --set ON_ERROR_STOP=on -d "assistant" <<'EOF'
           GRANT ALL PRIVILEGES ON DATABASE "$DB_ASSISTANT_DATABASE" TO "$DB_ASSISTANT_USERNAME";
-          GRANT azure_pg_admin TO "$DB_ASSISTANT_USERNAME";
+          GRANT ALL PRIVILEGES ON SCHEMA public TO "$DB_ASSISTANT_USERNAME";
           ALTER DATABASE "$DB_ASSISTANT_DATABASE" OWNER TO "$DB_ASSISTANT_USERNAME";
           EOF
+          
+          echo "create studio database"
+          psql -qtAX --set ON_ERROR_STOP=on <<'EOF'
+          CREATE DATABASE "$DB_STUDIO_DATABASE" WITH ENCODING = 'UTF8';
+          EOF
+          
+          echo "create keycloak database"
+          psql -qtAX --set ON_ERROR_STOP=on <<'EOF'
+          CREATE DATABASE "$DB_KEYCLOAK_DATABASE" WITH ENCODING = 'UTF8';
+          EOF
 
-          echo "create studio database and user"
+          echo "create studio user"
           psql -qtAX --set ON_ERROR_STOP=on <<'EOF'
           CREATE USER "$DB_STUDIO_USERNAME" WITH PASSWORD '$DB_STUDIO_PASSWORD';
-          CREATE DATABASE "$DB_STUDIO_DATABASE" WITH ENCODING = 'UTF8';
+          EOF
+          
+          echo "grant privileges to studio database"
+          psql -qtAX --set ON_ERROR_STOP=on -d "studio" <<'EOF'
           GRANT ALL PRIVILEGES ON DATABASE "$DB_STUDIO_DATABASE" TO "$DB_STUDIO_USERNAME";
-          GRANT azure_pg_admin TO "$DB_STUDIO_USERNAME";
+          GRANT ALL PRIVILEGES ON SCHEMA public TO "$DB_STUDIO_USERNAME";
           ALTER DATABASE "$DB_STUDIO_DATABASE" OWNER TO "$DB_STUDIO_USERNAME";
           EOF
-
-          echo "create keycloak database and user"
-          psql -qtAX --set ON_ERROR_STOP=on <<'EOF'
-          CREATE USER "$DB_KEYCLOAK_USERNAME" WITH PASSWORD '$DB_KEYCLOAK_PASSWORD';
-          CREATE DATABASE "$DB_KEYCLOAK_DATABASE" WITH ENCODING = 'UTF8';
-          GRANT ALL PRIVILEGES ON DATABASE "$DB_KEYCLOAK_DATABASE" TO "$DB_KEYCLOAK_USERNAME";
-          GRANT azure_pg_admin TO "$DB_KEYCLOAK_USERNAME";
-          ALTER DATABASE "$DB_KEYCLOAK_DATABASE" OWNER TO "$DB_KEYCLOAK_USERNAME";
+          
+          echo "grant privileges to keycloak database"
+          psql -qtAX --set ON_ERROR_STOP=on -d "keycloak" <<'EOF'
+          GRANT ALL PRIVILEGES ON DATABASE "$DB_KEYCLOAK_DATABASE" TO "$DB_STUDIO_USERNAME";
+          GRANT ALL PRIVILEGES ON SCHEMA public TO "$DB_STUDIO_USERNAME";
+          ALTER DATABASE "$DB_KEYCLOAK_DATABASE" OWNER TO "$DB_STUDIO_USERNAME";
           EOF
-
-          echo "granting schema public to keycloak user role..."
-          psql -qtAX --set ON_ERROR_STOP=on -c "GRANT ALL PRIVILEGES ON SCHEMA public TO \"$DB_KEYCLOAK_USERNAME\";"
-          echo "granted schema public to keycloak"
 
           sleep 10
           echo "done"
