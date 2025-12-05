@@ -1,13 +1,7 @@
 rasa:
   enabled: true
-  # Configure the service account which allows Rasa to interact with AWS resources like reading data from Cloud Storage buckets.
-  serviceAccountName: rasa-assistant
-  serviceAccount:
-    create: true
-    name: rasa-assistant
-    annotations:
-      eks.amazonaws.com/role-arn: ${SERVICE_ACCOUNT_ASSISTANT}
   settings:
+    environment: production
     enableApi: true
     credentials:
       enabled: true
@@ -40,15 +34,16 @@ rasa:
         url: ${DB_HOST}
         db: ${DB_ASSISTANT_DATABASE}
         username: ${DB_ASSISTANT_USERNAME}
+        password: ${DB_PASSWORD}
         port: 5432
       # Configure the assistant to use Redis as the Rasa Lock Store.
       # This is needed when you have a high-load scenario that requires the Rasa server to be replicated across multiple instances. It ensures that even with multiple servers, the messages for each conversation are handled in the correct sequence without any loss or overlap.
       lockStore:
         enabled: true
         type: concurrent_redis
-        port: 6379
+        password: ${REDIS_PASSWORD}
+        port: 6380
         url: ${REDIS_HOST}
-        username: ${REDIS_USER}
         use_ssl: true
         key_prefix: ${NAME}
       # Configure the assistant to use the Kafka broker. This allows us to perform further processing on the messages, like using the Rasa Studio Conversation View or Rasa Pro Analytics.
@@ -56,57 +51,45 @@ rasa:
         enabled: true
         type: kafka
         security_protocol: SASL_PLAINTEXT
-        sasl_mechanism: PLAIN
+        sasl_mechanism: SCRAM-SHA-512
         topic: rasa
-        url: kafka-controller-headless.${NAMESPACE}.svc.cluster.local:9092
-        sasl_username: ${KAFKA_USER}
+        url: kafka-kafka-bootstrap.${NAMESPACE}.svc.cluster.local:9092
+        sasl_username: kafka
         sasl_password: ${KAFKA_PASSWORD}
         ssl_check_hostname: false
-  # We'll configure Rasa to use AWS for remote storage, so we can load models from the buckets we created earlier.
+  # We'll configure Rasa to use Azure for remote storage, so we can load models from the buckets we created earlier.
   additionalArgs:
     - --remote-storage
-    - aws
+    - azure
   # Define the environment variables that Rasa needs to function and interact with the above services.
   # Note here that some of the values are plaintext environment variables and some are configured to be pulled from the Kubernetes Secret we created earlier.
   additionalEnv:
-    - name: IAM_CLOUD_PROVIDER
-      value: aws
-    - name: ELASTICACHE_REDIS_AWS_IAM_ENABLED
-      value: "true"
-    - name: RDS_SQL_DB_AWS_IAM_ENABLED
-      value: "true"
-    - name: AWS_DEFAULT_REGION
-      value: ${AWS_REGION}
-    - name: SQL_TRACKER_STORE_SSL_MODE
-      value: require
-    - name: RASA_ENVIRONMENT
-      value: production
+    - name: AZURE_CONTAINER
+      value: ${ASSISTANT_STORAGE_CONTAINER}
+    - name: AZURE_ACCOUNT_NAME
+      value: ${NAME}
+    - name: AZURE_ACCOUNT_KEY
+      valueFrom:
+        secretKeyRef:
+          name: rasa-secrets
+          key: storageAccountKey
     - name: BUCKET_NAME
       value: ${MODEL_BUCKET}
-    - name: DB_HOST
-      value: ${DB_HOST}
-    - name: DB_DATABASE
-      value: ${DB_ASSISTANT_DATABASE}
-    - name: DB_USER
-      value: assistant
+    - name: DB_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: rasa-secrets
+          key: dbPassword
     - name: KAFKA_PASSWORD
       valueFrom:
         secretKeyRef:
           name: rasa-secrets
           key: kafkaSslPassword
-    - name: KAFKA_USER
-      value: kafka
-    - name: REDIS_HOST
-      value: ${REDIS_HOST}
-    - name: REDIS_USER
-      value: ${REDIS_USER}
-    - name: AWS_ELASTICACHE_CLUSTER_NAME
-      value: ${REDIS_CLUSTER_NAME}
-    - name: RASA_PRO_LICENSE
+    - name: REDIS_PASSWORD
       valueFrom:
         secretKeyRef:
           name: rasa-secrets
-          key: rasaProLicense
+          key: redisPassword
     - name: OPENAI_API_KEY
       valueFrom:
         secretKeyRef:

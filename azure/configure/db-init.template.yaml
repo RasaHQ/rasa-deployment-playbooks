@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: db-init
+spec:
+  containers:
+    - name: db-init
+      image: postgres:$PG_VERSION
+      imagePullPolicy: IfNotPresent
+      command:
+        - "/bin/bash"
+        - "-ec"
+        - "--"
+      args:
+        - |
+          echo "create assistant database"
+          psql -qtAX --set ON_ERROR_STOP=on <<'EOF'
+          CREATE DATABASE "$DB_ASSISTANT_DATABASE" WITH ENCODING = 'UTF8';
+          EOF
+          
+          echo "create assistant user"
+          psql -qtAX --set ON_ERROR_STOP=on <<'EOF'
+          CREATE USER "$DB_ASSISTANT_USERNAME" WITH PASSWORD '$DB_ASSISTANT_PASSWORD';
+          EOF
+          
+          echo "grant privileges to assistant database"
+          psql -qtAX --set ON_ERROR_STOP=on -d "assistant" <<'EOF'
+          GRANT ALL PRIVILEGES ON DATABASE "$DB_ASSISTANT_DATABASE" TO "$DB_ASSISTANT_USERNAME";
+          GRANT ALL PRIVILEGES ON SCHEMA public TO "$DB_ASSISTANT_USERNAME";
+          ALTER DATABASE "$DB_ASSISTANT_DATABASE" OWNER TO "$DB_ASSISTANT_USERNAME";
+          EOF
+          
+          echo "create studio database"
+          psql -qtAX --set ON_ERROR_STOP=on <<'EOF'
+          CREATE DATABASE "$DB_STUDIO_DATABASE" WITH ENCODING = 'UTF8';
+          EOF
+          
+          echo "create keycloak database"
+          psql -qtAX --set ON_ERROR_STOP=on <<'EOF'
+          CREATE DATABASE "$DB_KEYCLOAK_DATABASE" WITH ENCODING = 'UTF8';
+          EOF
+
+          echo "create studio user"
+          psql -qtAX --set ON_ERROR_STOP=on <<'EOF'
+          CREATE USER "$DB_STUDIO_USERNAME" WITH PASSWORD '$DB_STUDIO_PASSWORD';
+          EOF
+          
+          echo "grant privileges to studio database"
+          psql -qtAX --set ON_ERROR_STOP=on -d "studio" <<'EOF'
+          GRANT ALL PRIVILEGES ON DATABASE "$DB_STUDIO_DATABASE" TO "$DB_STUDIO_USERNAME";
+          GRANT ALL PRIVILEGES ON SCHEMA public TO "$DB_STUDIO_USERNAME";
+          ALTER DATABASE "$DB_STUDIO_DATABASE" OWNER TO "$DB_STUDIO_USERNAME";
+          EOF
+          
+          echo "grant privileges to keycloak database"
+          psql -qtAX --set ON_ERROR_STOP=on -d "keycloak" <<'EOF'
+          GRANT ALL PRIVILEGES ON DATABASE "$DB_KEYCLOAK_DATABASE" TO "$DB_STUDIO_USERNAME";
+          GRANT ALL PRIVILEGES ON SCHEMA public TO "$DB_STUDIO_USERNAME";
+          ALTER DATABASE "$DB_KEYCLOAK_DATABASE" OWNER TO "$DB_STUDIO_USERNAME";
+          EOF
+
+          sleep 10
+          echo "done"
+      env:
+        - name: PGHOST
+          value: $DB_HOST
+        - name: PGUSER
+          value: $DB_ROOT_UN
+        - name: PGPASSWORD
+          value: "$DB_ROOT_PW"
+        - name: PGPORT
+          value: "$DB_PORT"
+  restartPolicy: Never

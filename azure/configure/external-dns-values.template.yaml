@@ -1,0 +1,37 @@
+serviceAccount:
+  create: true
+  name: external-dns
+  labels:
+    azure.workload.identity/use: "true"
+  annotations:
+    azure.workload.identity/client-id: $SERVICE_ACCOUNT_DNS
+
+podLabels:
+  azure.workload.identity/use: "true"
+
+extraVolumes:
+  - name: azure-config-file
+    secret:
+      secretName: external-dns-azure
+
+extraVolumeMounts:
+  - name: azure-config-file
+    mountPath: /etc/kubernetes
+    readOnly: true
+
+rbac:
+  create: true
+
+policy: sync
+
+sources:
+  - istio-gateway
+  - ingress
+
+txtOwnerId: $NAME
+
+provider:
+  name: azure
+
+domainFilters:
+  - $DOMAIN

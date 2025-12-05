@@ -10,22 +10,9 @@ config:
   database:
     # -- The database host name
     host: ${DB_HOST}
-    # -- The database port
-    port: "5432"
     # -- The database username
-    username: "${DB_STUDIO_USERNAME}"
-    # -- The database password
-    password:
-      secretName: "studio-secrets"
-      secretKey: "DATABASE_PASSWORD"
+    username: ${DB_STUDIO_USERNAME}
 backend:
-  serviceAccount:
-    # -- serviceAccount.create specifies whether a service account should be created
-    create: true
-    # -- serviceAccount.annotations defines annotations to add to the service account
-    annotations:
-      ieks.amazonaws.com/role-arn: ${SERVICE_ACCOUNT_STUDIO}
-    name: "studio-backend"
   # -- Configure the ingress resource that allows you to access the deployment installation.
   ## ref: http://kubernetes.io/docs/user-guide/ingress/
   ingress:
@@ -37,25 +24,14 @@ backend:
 eventIngestion:
   environmentVariables:
     KAFKA_BROKER_ADDRESS: 
-      value: kafka.${NAMESPACE}.svc.cluster.local:9092
+      value: kafka-kafka-bootstrap.${NAMESPACE}.svc.cluster.local:9092
     KAFKA_SASL_MECHANISM:
-      value: plain
+      value: SCRAM-SHA-512
     KAFKA_SASL_USERNAME:
       value: kafka
     KAFKA_TOPIC:
       value: rasa
-    KAFKA_GROUP_ID:
-      value: studio
-    KAFKA_DLQ_TOPIC:
-      value: rasa-events-dlq
-web-client:
-  serviceAccount:
-    # -- serviceAccount.create specifies whether a service account should be created
-    create: true
-    # -- serviceAccount.annotations defines annotations to add to the service account
-    annotations:
-      eks.amazonaws.com/role-arn: ${SERVICE_ACCOUNT_STUDIO}
-    name: "studio-webclient"
+webClient:
   ingress:
     # -- ingress.tls spefices the TLS configuration for ingress
     tls:
@@ -69,21 +45,20 @@ keycloak:
       - secretName: ${NAME}-studio-tls
         hosts:
           - studio.${DOMAIN}
-  serviceAccount:
-    # -- serviceAccount.create specifies whether a service account should be created
-    create: true
-    # -- serviceAccount.annotations defines annotations to add to the service account
-    annotations:
-      eks.amazonaws.com/role-arn: ${SERVICE_ACCOUNT_STUDIO}
-    # -- serviceAccount.name defines the name of the service account to use.
-    name: "studio-keycloak"
 rasa:
   rasa:
     additionalEnv:
       - name: RASA_REMOTE_STORAGE
-        value: aws
-      - name: BUCKET_NAME
-        value: ${STUDIO_BUCKET}
+        value: azure
+      - name: AZURE_CONTAINER
+        value: ${STUDIO_STORAGE_CONTAINER}
+      - name: AZURE_ACCOUNT_NAME
+        value: ${NAME}
+      - name: AZURE_ACCOUNT_KEY
+        valueFrom:
+          secretKeyRef:
+            name: studio-secrets
+            key: storageAccountKey
     ingress:
       className: istio
       hosts:
@@ -97,4 +72,4 @@ rasa:
           hosts:
             - studio.${DOMAIN}
     persistence:
-      storageClassName: auto-ebs-sc
+      storageClassName: default
