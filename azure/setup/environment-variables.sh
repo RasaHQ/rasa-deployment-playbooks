@@ -20,8 +20,6 @@ export MY_EMAIL=email@example.com
 export DB_ASSISTANT_PASSWORD="your-assistant-db-password"
 # The password you'd like to use for the Rasa Studio database.
 export DB_STUDIO_PASSWORD="your-studio-db-password"
-# The password you'd like to use for the Keycloak database.
-export DB_KEYCLOAK_PASSWORD="your-studio-db-password"
 # The license string for Rasa Pro.
 export RASA_PRO_LICENSE="Your Rasa Pro license string here"
 # Your OpenAI API Key.
@@ -44,7 +42,9 @@ export DB_ASSISTANT_DATABASE="assistant"
 export DB_ASSISTANT_USERNAME="assistant"
 # The database name for Rasa Studio.
 export DB_STUDIO_DATABASE="studio"
-# The username for the Rasa Studio database.
+# The database name for Keycloak.
+export DB_KEYCLOAK_DATABASE="keycloak"
+# The username for the Rasa Studio databases.
 export DB_STUDIO_USERNAME="studio"
 # The version of PostgreSQL Container to use for applying some configuration to the database.
 export PG_VERSION=17
@@ -71,7 +71,6 @@ echo "Domain:                      $DOMAIN"
 echo "Let's Encrypt email:         $MY_EMAIL"
 echo "DB assistant password:       $DB_ASSISTANT_PASSWORD"
 echo "DB studio password:          $DB_STUDIO_PASSWORD"
-echo "DB keycloak password:        $DB_KEYCLOAK_PASSWORD"
 echo "Rasa Pro license:            $RASA_PRO_LICENSE"
 echo "OpenAI API key:              $OPENAI_API_KEY"
 echo "Assistant storage container: $ASSISTANT_STORAGE_CONTAINER"
@@ -80,6 +79,7 @@ echo "Deployment name prefix:      $NAME"
 echo "K8S namespace:               $NAMESPACE"
 echo "DB assistant database:       $DB_ASSISTANT_DATABASE"
 echo "DB assistant username:       $DB_ASSISTANT_USERNAME"
+echo "DB studio database:          $DB_STUDIO_DATABASE"
 echo "DB studio database:          $DB_STUDIO_DATABASE"
 echo "DB studio username:          $DB_STUDIO_USERNAME"
 echo "PostgreSQL version:          $PG_VERSION"
