@@ -402,6 +402,8 @@ resource "azurerm_private_endpoint" "main" {
     is_manual_connection           = false
     subresource_names              = ["redisCache"]
   }
+
+  depends_on = [azurerm_subnet_nat_gateway_association.workers]
 }
 
 output "redis_host" {
@@ -470,6 +472,10 @@ resource "azurerm_kubernetes_cluster" "main" {
       default_node_pool[0].node_count
     ]
   }
+
+  depends_on = [
+    azurerm_subnet_nat_gateway_association.workers
+  ]
 
   identity {
     type = "SystemAssigned"
