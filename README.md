@@ -4,3 +4,4 @@ This repo hosts scripts and sample values files to help you with production depl
 Playbooks are available for the following cloud providers:
 - [Google Cloud Platform (GCP) Playbook](gcp/README.md)
 - [Amazon Web Services (AWS) Playbook](aws/README.md)
+- [Microsoft Azure Playbook](azure/README.md)
