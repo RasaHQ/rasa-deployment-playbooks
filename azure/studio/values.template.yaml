@@ -12,6 +12,7 @@ config:
     host: ${DB_HOST}
     # -- The database username
     username: ${DB_STUDIO_USERNAME}
+    keycloakDatabaseName: ${DB_KEYCLOAK_DATABASE}
 backend:
   # -- Configure the ingress resource that allows you to access the deployment installation.
   ## ref: http://kubernetes.io/docs/user-guide/ingress/
@@ -21,6 +22,10 @@ backend:
       - secretName: ${NAME}-studio-tls
         hosts:
           - studio.${DOMAIN}
+  migration:
+    environmentVariables:
+      SKIP_KEYCLOAK:
+        value: "true"
 eventIngestion:
   environmentVariables:
     KAFKA_BROKER_ADDRESS: 
