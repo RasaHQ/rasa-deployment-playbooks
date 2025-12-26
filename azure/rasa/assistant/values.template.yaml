@@ -73,8 +73,6 @@ rasa:
         secretKeyRef:
           name: rasa-secrets
           key: storageAccountKey
-    - name: BUCKET_NAME
-      value: ${MODEL_BUCKET}
     - name: DB_PASSWORD
       valueFrom:
         secretKeyRef:
