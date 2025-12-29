@@ -8,6 +8,7 @@ rasa:
     annotations:
       eks.amazonaws.com/role-arn: ${SERVICE_ACCOUNT_ASSISTANT}
   settings:
+    environment: production
     enableApi: true
     credentials:
       enabled: true
@@ -79,8 +80,6 @@ rasa:
       value: ${AWS_REGION}
     - name: SQL_TRACKER_STORE_SSL_MODE
       value: require
-    - name: RASA_ENVIRONMENT
-      value: production
     - name: BUCKET_NAME
       value: ${MODEL_BUCKET}
     - name: DB_HOST
@@ -102,11 +101,6 @@ rasa:
       value: ${REDIS_USER}
     - name: AWS_ELASTICACHE_CLUSTER_NAME
       value: ${REDIS_CLUSTER_NAME}
-    - name: RASA_PRO_LICENSE
-      valueFrom:
-        secretKeyRef:
-          name: rasa-secrets
-          key: rasaProLicense
     - name: OPENAI_API_KEY
       valueFrom:
         secretKeyRef:
