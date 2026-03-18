@@ -1,19 +1,20 @@
 rasa:
   enabled: true
+  image:
+    tag: "3.16.0"
   settings:
     environment: production
     enableApi: true
     credentials:
       enabled: true
-      additionalChannelCredentials:
-        socketio:
-          bot_message_evt: bot_uttered
-          metadata_key: customData
-          session_persistence: false
-          user_message_evt: user_uttered
-        rest: { }
+      socketio:
+        bot_message_evt: bot_uttered
+        metadata_key: customData
+        session_persistence: false
+        user_message_evt: user_uttered
+      rest: { }
     endpoints:
-      modelGroups:
+      model_groups:
       - id: openai-gpt-4o
         models:
         - max_tokens: 256
@@ -24,10 +25,8 @@ rasa:
         models:
         - model: text-embedding-3-small
           provider: openai
-      models:
-        enabled: false
       # Configure the assistant to use our PostgreSQL instance as the Tracker Store, which records the assistant's conversations.
-      trackerStore:
+      tracker_store:
         enabled: true
         type: sql
         dialect: postgresql
@@ -38,7 +37,7 @@ rasa:
         port: 5432
       # Configure the assistant to use Redis as the Rasa Lock Store.
       # This is needed when you have a high-load scenario that requires the Rasa server to be replicated across multiple instances. It ensures that even with multiple servers, the messages for each conversation are handled in the correct sequence without any loss or overlap.
-      lockStore:
+      lock_store:
         enabled: true
         type: concurrent_redis
         password: ${REDIS_PASSWORD}
@@ -47,7 +46,7 @@ rasa:
         use_ssl: true
         key_prefix: ${NAME}
       # Configure the assistant to use the Kafka broker. This allows us to perform further processing on the messages, like using the Rasa Studio Conversation View or Rasa Pro Analytics.
-      eventBroker:
+      event_broker:
         enabled: true
         type: kafka
         security_protocol: SASL_PLAINTEXT
