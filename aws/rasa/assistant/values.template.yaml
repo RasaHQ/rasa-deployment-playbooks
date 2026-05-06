@@ -24,6 +24,13 @@ rasa:
         rest: { }
     endpoints:
       modelGroups:
+      # Default for current `rasa init` (Rasa Pro 3.16-era contactbot starter).
+      - id: openai-gpt-5-1
+        models:
+        - provider: openai
+          model: gpt-5.1-2025-11-13
+          reasoning_effort: "none"
+          timeout: 15
       - id: openai-gpt-4o
         models:
         - max_tokens: 256
