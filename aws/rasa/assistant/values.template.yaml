@@ -1,7 +1,8 @@
 rasa:
   enabled: true
   image:
-    tag: "3.14.8-latest"
+    repository: "rasa/rasa-pro"
+    tag: "3.16.5"
   # Configure the service account which allows Rasa to interact with AWS resources like reading data from Cloud Storage buckets.
   serviceAccountName: rasa-assistant
   serviceAccount:
