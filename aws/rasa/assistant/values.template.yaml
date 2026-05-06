@@ -89,7 +89,7 @@ rasa:
     - name: DB_DATABASE
       value: ${DB_ASSISTANT_DATABASE}
     - name: DB_USER
-      value: assistant
+      value: ${DB_ASSISTANT_USERNAME}
     - name: KAFKA_PASSWORD
       valueFrom:
         secretKeyRef:
