@@ -31,7 +31,7 @@ kubectl apply -f $SCRIPT_DIR/storage-class.yaml
 print_info "Generating a random 16 character password for Kafka to use for authentication..."
 export KAFKA_PASSWORD=$(openssl rand -hex 16)
 envsubst < $SCRIPT_DIR/kafka.template.yaml > $SCRIPT_DIR/kafka.yaml
-print_info "Kafka password: $KAFKA_PASSWORD"
+print_info "Kafka password: $([ -n "$KAFKA_PASSWORD" ] && echo '<set>' || echo '<not set>')"
 print_info "Kafka configuration file generated successfully!"
 
 # We'll fetch the automatically generated password from the previous step, and then use it to create a couple of configuration files locally that act as configuration for Rasa to be able to connect to Kafka

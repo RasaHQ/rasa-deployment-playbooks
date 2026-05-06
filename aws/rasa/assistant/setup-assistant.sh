@@ -47,12 +47,12 @@ export AUTH_TOKEN=$(openssl rand -hex 8 | base64)
 export JWT_SECRET=$(openssl rand -hex 8 | base64)
 export KAFKA_CLIENT_PASSWORD=$(kubectl get secret kafka-user-passwords -n $NAMESPACE -o jsonpath='{.data.client-passwords}' | base64 -d | cut -d ',' -f 1)
 
-print_info "Secret values retrieved. If any of the values below are not set, be sure to set them manually and re-run this script."
-print_info "AUTH_TOKEN: $AUTH_TOKEN"
-print_info "JWT_SECRET: $JWT_SECRET"
-print_info "KAFKA_CLIENT_PASSWORD: $KAFKA_CLIENT_PASSWORD"
-print_info "RASA_PRO_LICENSE: $RASA_PRO_LICENSE"
-print_info "OPENAI_API_KEY: $OPENAI_API_KEY"
+print_info "Secret values retrieved. Presence-only output below — raw values not printed so tee'd logs stay clean."
+print_info "AUTH_TOKEN:            $([ -n "$AUTH_TOKEN" ] && echo '<set>' || echo '<not set>')"
+print_info "JWT_SECRET:            $([ -n "$JWT_SECRET" ] && echo '<set>' || echo '<not set>')"
+print_info "KAFKA_CLIENT_PASSWORD: $([ -n "$KAFKA_CLIENT_PASSWORD" ] && echo '<set>' || echo '<not set>')"
+print_info "RASA_PRO_LICENSE:      $([ -n "$RASA_PRO_LICENSE" ] && echo '<set>' || echo '<not set>')"
+print_info "OPENAI_API_KEY:        $([ -n "$OPENAI_API_KEY" ] && echo '<set>' || echo '<not set>')"
 
 print_info "Creating a Kubernetes secret for these values..."
 # Idempotent secret create — succeeds on rerun by replacing the existing Secret.
