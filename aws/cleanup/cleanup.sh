@@ -35,4 +35,26 @@ TARGET_DIR_RELATIVE="$SCRIPT_DIR/../deploy/_tf"
 TARGET_DIR_ABSOLUTE=$(realpath "$TARGET_DIR_RELATIVE")
 $TF_CMD -chdir=$TARGET_DIR_ABSOLUTE destroy -auto-approve
 
+# Delete EBS volumes left over from dynamic PVC provisioning. The EBS CSI driver
+# creates these in response to PVCs (e.g. from the Kafka StatefulSet), but
+# terraform doesn't track them in state, so `terraform destroy` doesn't remove
+# them — they end up as orphan `available` volumes after cleanup, costing money
+# and cluttering the account. This sweep runs AFTER terraform destroy and only
+# matches volumes tagged with this deployment's NAME prefix and in `available`
+# state, so it can never touch a live volume from another deployment.
+print_info "Sweeping orphan EBS volumes left over from dynamic PVC provisioning..."
+ORPHAN_VOLS=$(aws ec2 describe-volumes \
+  --region "$REGION" \
+  --filters "Name=tag:Name,Values=${NAME}-dynamic-pvc-*" "Name=status,Values=available" \
+  --query 'Volumes[].VolumeId' \
+  --output text)
+if [ -n "$ORPHAN_VOLS" ]; then
+  for vol in $ORPHAN_VOLS; do
+    print_info "  deleting $vol"
+    aws ec2 delete-volume --region "$REGION" --volume-id "$vol" || true
+  done
+else
+  print_info "  none found"
+fi
+
 print_info "Cleanup completed! Check the output above for any errors."
