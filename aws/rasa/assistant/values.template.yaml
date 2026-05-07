@@ -52,7 +52,7 @@ rasa:
       lock_store:
         type: concurrent_redis
         port: 6379
-        url: ${REDIS_HOST}
+        host: ${REDIS_HOST}
         username: ${REDIS_USER}
         use_ssl: true
         key_prefix: ${NAME}
