@@ -1,7 +1,8 @@
 rasa:
   enabled: true
   image:
-    tag: "3.14.8-latest"
+    repository: "rasa/rasa-pro"
+    tag: "3.16.5"
   # Configure the service account which allows Rasa to interact with AWS resources like reading data from Cloud Storage buckets.
   serviceAccountName: rasa-assistant
   serviceAccount:
@@ -13,16 +14,21 @@ rasa:
     environment: production
     enableApi: true
     credentials:
-      enabled: true
-      additionalChannelCredentials:
-        socketio:
-          bot_message_evt: bot_uttered
-          metadata_key: customData
-          session_persistence: false
-          user_message_evt: user_uttered
-        rest: { }
+      socketio:
+        bot_message_evt: bot_uttered
+        metadata_key: customData
+        session_persistence: false
+        user_message_evt: user_uttered
+      rest: {}
     endpoints:
-      modelGroups:
+      model_groups:
+      # Default for current `rasa init` (Rasa Pro 3.16-era contactbot starter).
+      - id: openai-gpt-5-1
+        models:
+        - provider: openai
+          model: gpt-5.1-2025-11-13
+          reasoning_effort: "none"
+          timeout: 15
       - id: openai-gpt-4o
         models:
         - max_tokens: 256
@@ -33,11 +39,8 @@ rasa:
         models:
         - model: text-embedding-3-small
           provider: openai
-      models:
-        enabled: false
       # Configure the assistant to use our PostgreSQL instance as the Tracker Store, which records the assistant's conversations.
-      trackerStore:
-        enabled: true
+      tracker_store:
         type: sql
         dialect: postgresql
         url: ${DB_HOST}
@@ -46,17 +49,15 @@ rasa:
         port: 5432
       # Configure the assistant to use Redis as the Rasa Lock Store.
       # This is needed when you have a high-load scenario that requires the Rasa server to be replicated across multiple instances. It ensures that even with multiple servers, the messages for each conversation are handled in the correct sequence without any loss or overlap.
-      lockStore:
-        enabled: true
+      lock_store:
         type: concurrent_redis
         port: 6379
-        url: ${REDIS_HOST}
+        host: ${REDIS_HOST}
         username: ${REDIS_USER}
         use_ssl: true
         key_prefix: ${NAME}
       # Configure the assistant to use the Kafka broker. This allows us to perform further processing on the messages, like using the Rasa Studio Conversation View or Rasa Pro Analytics.
-      eventBroker:
-        enabled: true
+      event_broker:
         type: kafka
         security_protocol: SASL_PLAINTEXT
         sasl_mechanism: PLAIN
@@ -89,7 +90,7 @@ rasa:
     - name: DB_DATABASE
       value: ${DB_ASSISTANT_DATABASE}
     - name: DB_USER
-      value: assistant
+      value: ${DB_ASSISTANT_USERNAME}
     - name: KAFKA_PASSWORD
       valueFrom:
         secretKeyRef:

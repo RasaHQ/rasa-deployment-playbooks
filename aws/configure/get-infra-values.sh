@@ -25,10 +25,23 @@ TARGET_DIR_ABSOLUTE="$SCRIPT_DIR/../deploy/_tf"
 
 export DB_SECRET_ID=$($TF_CMD -chdir=$TARGET_DIR_ABSOLUTE output -raw secret_id_db)
 
-aws secretsmanager get-secret-value --secret-id $DB_SECRET_ID | jq -r '.SecretString' > secret_db.json
-
-export DB_ROOT_UN=$(jq -r '.username' secret_db.json)
-export DB_ROOT_PW=$(jq -r '.password' secret_db.json)
+# Read the RDS root credentials in-memory and unset the JSON afterward.
+# Avoids writing secret_db.json to the calling user's CWD (world-readable, easy to leak).
+# Avoids installing an EXIT trap from this sourced script — that would clobber the caller's trap.
+DB_SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id "$DB_SECRET_ID" --query SecretString --output text)
+if [ -z "$DB_SECRET_JSON" ] || [ "$DB_SECRET_JSON" = "None" ]; then
+  echo "ERROR: failed to fetch RDS secret from $DB_SECRET_ID" >&2
+  return 1 2>/dev/null || exit 1
+fi
+export DB_ROOT_UN=$(jq -r '.username' <<<"$DB_SECRET_JSON")
+export DB_ROOT_PW=$(jq -r '.password' <<<"$DB_SECRET_JSON")
+unset DB_SECRET_JSON
+# Post-extraction guard. `export VAR=$(jq …)` masks jq's exit code, so without this
+# malformed JSON would silently produce broken downstream behaviour.
+if [ -z "$DB_ROOT_UN" ] || [ "$DB_ROOT_UN" = "null" ] || [ -z "$DB_ROOT_PW" ] || [ "$DB_ROOT_PW" = "null" ]; then
+  echo "ERROR: malformed RDS secret JSON — DB_ROOT_UN/DB_ROOT_PW could not be extracted" >&2
+  return 1 2>/dev/null || exit 1
+fi
 export DB_PORT=$($TF_CMD -chdir=$TARGET_DIR_ABSOLUTE output -raw db_port)
 export DB_HOST=$($TF_CMD -chdir=$TARGET_DIR_ABSOLUTE output -raw db_host)
 export DB_HOST="${DB_HOST%:$DB_PORT}"
@@ -43,7 +56,8 @@ export SERVICE_ACCOUNT_STUDIO=$($TF_CMD -chdir=$TARGET_DIR_ABSOLUTE output -raw 
 echo "Infrastructure values fetched successfully:"
 echo "DB_SECRET_ID=$DB_SECRET_ID"
 echo "DB_ROOT_UN=$DB_ROOT_UN"
-echo "DB_ROOT_PW=$DB_ROOT_PW"
+# Print presence-only for the password so tee'd command logs don't capture the raw value.
+echo "DB_ROOT_PW=$([ -n "$DB_ROOT_PW" ] && echo '<set>' || echo '<not set>')"
 echo "DB_PORT=$DB_PORT"
 echo "DB_HOST=$DB_HOST"
 echo "REDIS_HOST=$REDIS_HOST"
