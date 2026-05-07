@@ -33,12 +33,12 @@ export OPENAI_API_KEY_SECRET_KEY=${OPENAI_API_KEY:-'OpenAI API Key is not set! S
 export DB_STUDIO_PASSWORD=${DB_STUDIO_PASSWORD:-'Password is not set! Set it manually with `export DB_STUDIO_PASSWORD=yourpassword`'}
 
 print_info "Secret values retrieved. Presence-only output below — raw values not printed so tee'd logs stay clean."
-print_info "KEYCLOAK_ADMIN_PASSWORD:   $([ -n "$KEYCLOAK_ADMIN_PASSWORD" ] && echo '<set>' || echo '<not set>')"
-print_info "KEYCLOAK_API_PASSWORD:     $([ -n "$KEYCLOAK_API_PASSWORD" ] && echo '<set>' || echo '<not set>')"
-print_info "REDIS_PASSWORD:            $([ -n "$REDIS_PASSWORD" ] && echo '<set>' || echo '<not set>')"
-print_info "KAFKA_CLIENT_PASSWORD:     $([ -n "$KAFKA_CLIENT_PASSWORD" ] && echo '<set>' || echo '<not set>')"
-print_info "OPENAI_API_KEY_SECRET_KEY: $([ -n "$OPENAI_API_KEY_SECRET_KEY" ] && echo '<set>' || echo '<not set>')"
-print_info "DB_STUDIO_PASSWORD:        $([ -n "$DB_STUDIO_PASSWORD" ] && echo '<set>' || echo '<not set>')"
+print_info "KEYCLOAK_ADMIN_PASSWORD:   $(secret_status KEYCLOAK_ADMIN_PASSWORD)"
+print_info "KEYCLOAK_API_PASSWORD:     $(secret_status KEYCLOAK_API_PASSWORD)"
+print_info "REDIS_PASSWORD:            $(secret_status REDIS_PASSWORD)"
+print_info "KAFKA_CLIENT_PASSWORD:     $(secret_status KAFKA_CLIENT_PASSWORD)"
+print_info "OPENAI_API_KEY_SECRET_KEY: $(secret_status OPENAI_API_KEY_SECRET_KEY)"
+print_info "DB_STUDIO_PASSWORD:        $(secret_status DB_STUDIO_PASSWORD)"
 
 print_info "Deleting a secret if it already exists..."
 kubectl delete secret studio-secrets -n $NAMESPACE || true
