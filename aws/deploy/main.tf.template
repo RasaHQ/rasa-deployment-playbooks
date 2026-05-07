@@ -165,16 +165,22 @@ module "eks" {
     }
     amazon-cloudwatch-observability = {
       most_recent = true
-      # Disable the mutating admission webhooks that auto-inject OpenTelemetry SDKs
-      # into Python/Java/.NET/Node.js pods. Rasa Pro ships its own OpenTelemetry
-      # SDK; the addon's injected OTel SDK is older and conflicts on import,
-      # crashing the rasa pod with `ImportError: cannot import name
-      # '_create_exp_backoff_generator'`. Container Insights (CloudWatch Agent +
-      # Fluent Bit DaemonSets) does NOT depend on these webhooks and continues
-      # to collect node/pod metrics and stream container logs to CloudWatch.
+      # Disable Application Signals auto-monitoring so the addon doesn't auto-inject
+      # OpenTelemetry SDKs into the Rasa Python pod. Rasa Pro ships its own OTel SDK;
+      # the addon's injected one is older and conflicts on import, crashing the rasa
+      # pod with `ImportError: cannot import name '_create_exp_backoff_generator'`.
+      # Container Insights (CloudWatch Agent + Fluent Bit DaemonSets) is unaffected
+      # and continues to collect node/pod metrics and stream container logs.
+      # Note: do NOT use `admissionWebhooks.create = false` here — it also skips
+      # generation of the controller-manager's serving-cert Secret, leaving the
+      # operator pod stuck in ContainerCreating and the addon stuck in CREATING.
       configuration_values = jsonencode({
-        admissionWebhooks = {
-          create = false
+        manager = {
+          applicationSignals = {
+            autoMonitor = {
+              monitorAllServices = false
+            }
+          }
         }
       })
     }
