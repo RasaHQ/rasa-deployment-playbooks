@@ -39,7 +39,7 @@ print_info "Pulling Rasa Helm chart..."
 mkdir -p "$SCRIPT_DIR/repos"
 # Make `helm pull --untar` idempotent — remove the prior chart dir before pulling.
 rm -rf "$SCRIPT_DIR/repos/rasa-helm"
-helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.3.2 --untar --destination "$SCRIPT_DIR/repos/rasa-helm"
+helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 2.0.6 --untar --destination "$SCRIPT_DIR/repos/rasa-helm"
 
 # Next, we'll ensure that other passwords and secret values that Rasa requires are set, before creating a Kubernetes Secret to securely store them in a way that we can reference later on:
 print_info "Creating secrets for the Rasa assistant to use..."
