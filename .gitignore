@@ -2,6 +2,7 @@
 kubeconfig
 gke_gcloud_auth_plugin_cache
 istio-*/
+.DS_Store
 
 # Generated files
 gcp/configure/cert-manager-certificate-issuer.yaml
@@ -70,3 +71,4 @@ azure/studio/certificate.yaml
 gcp/setup/environment-variables-dev.sh
 aws/setup/environment-variables-dev.sh
 azure/setup/environment-variables-dev.sh
+aws/rasa/assistant/AmazonRootCA1.pem
