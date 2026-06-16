@@ -34,3 +34,16 @@ validate_variables() {
         exit 1
     fi
 }
+
+# Return "<set>" if the named env var is set and non-empty, "<not set>" otherwise.
+# Used to mask secret values in stdout/log output without leaking the value.
+# Usage:
+#   echo "Rasa Pro license:    $(secret_status RASA_PRO_LICENSE)"
+#   print_info "RASA_PRO_LICENSE: $(secret_status RASA_PRO_LICENSE)"
+secret_status() {
+    if [[ -n "${!1}" ]]; then
+        echo "<set>"
+    else
+        echo "<not set>"
+    fi
+}

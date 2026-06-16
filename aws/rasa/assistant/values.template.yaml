@@ -1,7 +1,8 @@
 rasa:
   enabled: true
   image:
-    tag: "3.16.0"
+    repository: "rasa/rasa-pro"
+    tag: "3.16.5"
   # Configure the service account which allows Rasa to interact with AWS resources like reading data from Cloud Storage buckets.
   serviceAccountName: rasa-assistant
   serviceAccount:
@@ -22,6 +23,13 @@ rasa:
       rest: { }
     endpoints:
       model_groups:
+      # Default for current `rasa init` (Rasa Pro 3.16-era contactbot starter).
+      - id: openai-gpt-5-1
+        models:
+        - provider: openai
+          model: gpt-5.1-2025-11-13
+          reasoning_effort: "none"
+          timeout: 15
       - id: openai-gpt-4o
         models:
         - max_tokens: 256
@@ -47,7 +55,7 @@ rasa:
         enabled: true
         type: concurrent_redis
         port: 6379
-        url: ${REDIS_HOST}
+        host: ${REDIS_HOST}
         username: ${REDIS_USER}
         use_ssl: true
         key_prefix: ${NAME}
@@ -86,7 +94,7 @@ rasa:
     - name: DB_DATABASE
       value: ${DB_ASSISTANT_DATABASE}
     - name: DB_USER
-      value: assistant
+      value: ${DB_ASSISTANT_USERNAME}
     - name: KAFKA_PASSWORD
       valueFrom:
         secretKeyRef:
