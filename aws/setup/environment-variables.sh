@@ -51,6 +51,13 @@ export DB_KEYCLOAK_DATABASE="keycloak"
 export PG_VERSION=17
 # The username for the ElastiCache Redis IAM role.
 export REDIS_USER="assistant"
+# ECR repository and tag for the A2A custom action server image.
+# Requires ECR push permissions. Build and push with:
+#   aws/rasa/assistant/build-action-server.sh
+export ACTION_SERVER_IMAGE_REPO="your-account.dkr.ecr.us-east-1.amazonaws.com/rasa-a2a-actions"
+export ACTION_SERVER_IMAGE_TAG="latest"
+# Optional: path to qa-bots/a2a-server-agent (defaults to sibling repo next to deployment-playbooks).
+# export A2A_SERVER_AGENT_DIR="/path/to/qa-bots/a2a-server-agent"
 #--------------------------------
 
 # You almost certainly don't need to change the following environment variables which define the network architecture of the deployment.
@@ -96,6 +103,7 @@ echo "DB studio database:     $DB_STUDIO_DATABASE"
 echo "DB studio username:     $DB_STUDIO_USERNAME"
 echo "DB keycloak database:   $DB_KEYCLOAK_DATABASE"
 echo "Redis user:             $REDIS_USER"
+echo "Action server image:    $ACTION_SERVER_IMAGE_REPO:$ACTION_SERVER_IMAGE_TAG"
 echo "PostgreSQL version:     $PG_VERSION"
 echo "--------------------------------"
 echo "If any of the above values are incorrect or blank, please update the file and re-run."

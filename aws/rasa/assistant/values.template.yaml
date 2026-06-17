@@ -1,8 +1,15 @@
 rasa:
   enabled: true
+  replicaCount: 3
   image:
     repository: "rasa/rasa-pro"
     tag: "3.16.5"
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      memory: "2Gi"
   # Configure the service account which allows Rasa to interact with AWS resources like reading data from Cloud Storage buckets.
   serviceAccountName: rasa-assistant
   serviceAccount:
@@ -70,6 +77,14 @@ rasa:
         sasl_username: ${KAFKA_USER}
         sasl_password: ${KAFKA_PASSWORD}
         ssl_check_hostname: false
+      # ClusterIP service created by Helm (release name "rasa" → rasa-action-server).
+      action_endpoint:
+        url: "http://rasa-action-server:5055/webhook"
+      a2a_server:
+        url: "https://assistant.${DOMAIN}"
+        description: "Rasa Agent for handling queries about contact management."
+        include_conversation_repair: true
+        push_notifications_enabled: true
   # We'll configure Rasa to use AWS for remote storage, so we can load models from the buckets we created earlier.
   additionalArgs:
     - --remote-storage
@@ -77,6 +92,8 @@ rasa:
   # Define the environment variables that Rasa needs to function and interact with the above services.
   # Note here that some of the values are plaintext environment variables and some are configured to be pulled from the Kubernetes Secret we created earlier.
   additionalEnv:
+    - name: SANIC_WORKERS
+      value: "1"
     - name: IAM_CLOUD_PROVIDER
       value: aws
     - name: ELASTICACHE_REDIS_AWS_IAM_ENABLED
@@ -119,7 +136,11 @@ rasaProServices:
   enabled: false
 # https://rasa.com/docs/action-server
 actionServer:
-  enabled: false
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: ${ACTION_SERVER_IMAGE_REPO}
+    tag: ${ACTION_SERVER_IMAGE_TAG}
 # https://rasa.com/docs/reference/integrations/tracing
 tracing:
     enabled: false

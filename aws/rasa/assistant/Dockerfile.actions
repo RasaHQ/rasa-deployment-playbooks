@@ -1,0 +1,15 @@
+# Custom action server for the qa-bots/a2a-server-agent contact assistant.
+# Build context must be the bot project root (contains actions/ and db/).
+# Match the Rasa Pro version used by the main assistant deployment.
+FROM rasa/rasa-pro:3.16.5
+
+WORKDIR /app
+
+USER root
+
+COPY actions/ actions/
+COPY db/ db/
+
+USER 1001
+
+CMD ["rasa", "run", "actions"]
