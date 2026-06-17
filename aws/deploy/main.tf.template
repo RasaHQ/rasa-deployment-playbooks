@@ -151,9 +151,10 @@ module "eks" {
       instance_types = ["m6i.xlarge"]
       labels         = {}
 
-      min_size     = 1
-      max_size     = 3
-      desired_size = 2
+      # Sized for A2A multi-replica Rasa (3 pods) + action server + Kafka (3) + mesh add-ons.
+      min_size     = 2
+      max_size     = 5
+      desired_size = 3
     }
   }
 
