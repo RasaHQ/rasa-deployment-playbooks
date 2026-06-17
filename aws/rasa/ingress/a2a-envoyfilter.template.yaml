@@ -1,5 +1,5 @@
-# Extract A2A contextId from JSON-RPC POST bodies at the ingress gateway so
-# DestinationRule consistent hashing can pin a context to one Rasa pod.
+# Sets x-a2a-context-id on the ingress gateway for ConsistentHashLB routing.
+# Hybrid without Istio httpCookie (oneof): body contextId, client header, or app cookie.
 apiVersion: networking.istio.io/v1alpha3
 kind: EnvoyFilter
 metadata:
@@ -26,12 +26,42 @@ spec:
           typed_config:
             "@type": type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
             inlineCode: |
-              function envoy_on_request(request_handle)
+              local META_NAMESPACE = "rasa.a2a"
+
+              local function is_assistant_host(request_handle)
                 local authority = request_handle:headers():get(":authority")
                 if authority == nil then
                   authority = request_handle:headers():get("host")
                 end
-                if authority == nil or authority ~= "assistant.${DOMAIN}" then
+                return authority == "assistant.${DOMAIN}"
+              end
+
+              local function context_from_cookie(request_handle)
+                local cookie = request_handle:headers():get("cookie")
+                if cookie == nil then
+                  return nil
+                end
+                return string.match(cookie, "a2a%-context%-id=([^;]+)")
+              end
+
+              local function resolve_context_id(request_handle, body_str)
+                if body_str ~= nil and body_str ~= "" then
+                  local from_body = string.match(body_str, '"contextId"%s*:%s*"([^"\\]+)"')
+                  if from_body ~= nil and from_body ~= "" then
+                    return from_body
+                  end
+                end
+
+                local from_client = request_handle:headers():get("X-A2A-Context-Id")
+                if from_client ~= nil and from_client ~= "" then
+                  return from_client
+                end
+
+                return context_from_cookie(request_handle)
+              end
+
+              function envoy_on_request(request_handle)
+                if not is_assistant_host(request_handle) then
                   return
                 end
 
@@ -40,24 +70,42 @@ spec:
                   return
                 end
 
+                local body_str = nil
                 local content_type = request_handle:headers():get("content-type")
-                if content_type == nil or not string.find(content_type, "application/json", 1, true) then
+                if content_type ~= nil and string.find(content_type, "application/json", 1, true) then
+                  local body = request_handle:body(true)
+                  if body ~= nil and body:length() > 0 then
+                    body_str = body:getBytes(0, body:length())
+                  end
+                end
+
+                local context_id = resolve_context_id(request_handle, body_str)
+                if context_id == nil or context_id == "" then
                   return
                 end
 
-                local body = request_handle:body(true)
-                if body == nil then
+                request_handle:headers():replace("x-a2a-context-id", context_id)
+                request_handle:streamInfo():dynamicMetadata():set(
+                  META_NAMESPACE, "request.info", { context_id = context_id }
+                )
+              end
+
+              function envoy_on_response(response_handle)
+                if not is_assistant_host(response_handle) then
                   return
                 end
 
-                local length = body:length()
-                if length == 0 then
+                local meta = response_handle:streamInfo():dynamicMetadata():get(META_NAMESPACE)
+                local context_id = nil
+                if meta ~= nil and meta["request.info"] ~= nil then
+                  context_id = meta["request.info"]["context_id"]
+                end
+                if context_id == nil or context_id == "" then
                   return
                 end
 
-                local body_str = body:getBytes(0, length)
-                local context_id = string.match(body_str, '"contextId"%s*:%s*"([^"\\]+)"')
-                if context_id ~= nil and context_id ~= "" then
-                  request_handle:headers():replace("x-a2a-context-id", context_id)
-                end
+                response_handle:headers():add(
+                  "set-cookie",
+                  "a2a-context-id=" .. context_id .. "; Path=/; Max-Age=3600; HttpOnly; SameSite=Lax"
+                )
               end

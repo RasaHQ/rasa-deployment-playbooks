@@ -46,4 +46,4 @@ print_info "Deploying A2A EnvoyFilter on istio-ingressgateway..."
 kubectl apply -f "$SCRIPT_DIR/a2a-envoyfilter.yaml"
 
 print_info "You should now be able to access the Rasa assistant at https://assistant.$DOMAIN. It may take a few minutes for the certificate to issue and be fully available."
-print_info "A2A JSON-RPC traffic is load-balanced by contextId (header) with a2a-route cookie fallback for tasks/cancel."
+print_info "A2A JSON-RPC traffic is load-balanced by x-a2a-context-id (body contextId, X-A2A-Context-Id header, or a2a-context-id cookie)."

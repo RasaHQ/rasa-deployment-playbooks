@@ -121,9 +121,9 @@ if [[ "$STATE_1" != "input-required" && "$STATE_1" != "completed" ]]; then
 fi
 
 if [[ ! -s "$COOKIE_JAR" ]]; then
-  print_info "No cookie jar entries yet (a2a-route may be set on a later response)."
+  print_info "No a2a-context-id cookie captured yet (filter sets it on responses when contextId is routed)."
 else
-  print_info "Cookie jar captured after turn 1 (a2a-route sticky fallback)."
+  print_info "a2a-context-id cookie captured after turn 1."
 fi
 
 # --- 3. message/send turn 2 (same contextId) ----------------------------------
@@ -154,10 +154,11 @@ if [[ -z "$STATE_2" ]]; then
   exit 1
 fi
 
-# --- 4. tasks/cancel (cookie + task_id, no contextId in body) -----------------
+# --- 4. tasks/cancel (a2a-context-id cookie or X-A2A-Context-Id, no body contextId) ---
 
 if [[ "$STATE_1" == "input-required" && -n "$TASK_ID" ]]; then
-  print_info "Test 4: tasks/cancel (same cookie jar, task_id only)"
+  print_info "Test 4: tasks/cancel (same cookie jar from turns 1-2; task_id only in body)"
+  print_info "EnvoyFilter maps a2a-context-id cookie -> x-a2a-context-id for consistent hash."
   a2a_post "$(cat <<EOF
 {
   "jsonrpc": "2.0",

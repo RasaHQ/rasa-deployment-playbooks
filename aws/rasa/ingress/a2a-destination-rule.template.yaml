@@ -1,6 +1,10 @@
-# Sticky routing for A2A multi-replica Rasa pods (hybrid):
-# - x-a2a-context-id header (set by EnvoyFilter from JSON body) when present
-# - a2a-route cookie fallback for tasks/cancel and clients without contextId in body
+# Sticky routing for A2A multi-replica Rasa pods.
+# Istio ConsistentHashLB hash_key is a oneof — exactly ONE of httpHeaderName,
+# httpCookie, useSourceIp, or httpQueryParameterName (see Istio DestinationRule docs).
+# We hash on x-a2a-context-id; the ingress EnvoyFilter sets that header from:
+#   1) contextId in JSON body (message/send, message/stream)
+#   2) X-A2A-Context-Id request header (orchestrator / tasks/cancel)
+#   3) a2a-context-id cookie (set by the filter on prior responses)
 apiVersion: networking.istio.io/v1
 kind: DestinationRule
 metadata:
@@ -12,7 +16,3 @@ spec:
     loadBalancer:
       consistentHash:
         httpHeaderName: x-a2a-context-id
-        httpCookie:
-          name: a2a-route
-          ttl: 3600s
-          path: /
