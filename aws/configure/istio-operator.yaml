@@ -6,5 +6,5 @@ spec:
     pilot:
       k8s:
         env:
-        - name: ENABLE_NATIVE_SIDECARS
-          value: 'true'
+          - name: ENABLE_NATIVE_SIDECARS
+            value: 'true'

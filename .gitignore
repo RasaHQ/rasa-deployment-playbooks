@@ -3,6 +3,7 @@ kubeconfig
 gke_gcloud_auth_plugin_cache
 istio-*/
 .DS_Store
+.vscode/
 
 # Generated files
 gcp/configure/cert-manager-certificate-issuer.yaml
@@ -38,6 +39,8 @@ aws/rasa/kafka/kafka.yaml
 aws/rasa/assistant/repos/*
 aws/rasa/assistant/values.yaml
 aws/rasa/ingress/ingress.yaml
+aws/rasa/ingress/a2a-destination-rule.yaml
+aws/rasa/ingress/a2a-envoyfilter.yaml
 aws/rasa/ingress/certificate.yaml
 aws/studio/repos/*
 aws/studio/values.yaml

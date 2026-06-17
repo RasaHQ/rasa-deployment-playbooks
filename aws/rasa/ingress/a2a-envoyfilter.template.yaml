@@ -1,0 +1,63 @@
+# Extract A2A contextId from JSON-RPC POST bodies at the ingress gateway so
+# DestinationRule consistent hashing can pin a context to one Rasa pod.
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: $NAME-a2a-context-id-extract
+  namespace: istio-system
+spec:
+  workloadSelector:
+    labels:
+      istio: ingressgateway
+  configPatches:
+    - applyTo: HTTP_FILTER
+      match:
+        context: GATEWAY
+        listener:
+          filterChain:
+            filter:
+              name: envoy.filters.network.http_connection_manager
+              subFilter:
+                name: envoy.filters.http.router
+      patch:
+        operation: INSERT_BEFORE
+        value:
+          name: envoy.filters.http.lua
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
+            inlineCode: |
+              function envoy_on_request(request_handle)
+                local authority = request_handle:headers():get(":authority")
+                if authority == nil then
+                  authority = request_handle:headers():get("host")
+                end
+                if authority == nil or authority ~= "assistant.${DOMAIN}" then
+                  return
+                end
+
+                local method = request_handle:headers():get(":method")
+                if method ~= "POST" then
+                  return
+                end
+
+                local content_type = request_handle:headers():get("content-type")
+                if content_type == nil or not string.find(content_type, "application/json", 1, true) then
+                  return
+                end
+
+                local body = request_handle:body(true)
+                if body == nil then
+                  return
+                end
+
+                local length = body:length()
+                if length == 0 then
+                  return
+                end
+
+                local body_str = body:getBytes(0, length)
+                local context_id = string.match(body_str, '"contextId"%s*:%s*"([^"\\]+)"')
+                if context_id ~= nil and context_id ~= "" then
+                  request_handle:headers():replace("x-a2a-context-id", context_id)
+                end
+              end

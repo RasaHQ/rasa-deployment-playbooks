@@ -1,0 +1,18 @@
+# Sticky routing for A2A multi-replica Rasa pods (hybrid):
+# - x-a2a-context-id header (set by EnvoyFilter from JSON body) when present
+# - a2a-route cookie fallback for tasks/cancel and clients without contextId in body
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: $NAME-rasa-a2a-sticky
+  namespace: $NAMESPACE
+spec:
+  host: rasa.$NAMESPACE.svc.cluster.local
+  trafficPolicy:
+    loadBalancer:
+      consistentHash:
+        httpHeaderName: x-a2a-context-id
+        httpCookie:
+          name: a2a-route
+          ttl: 3600s
+          path: /
