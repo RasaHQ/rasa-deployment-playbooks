@@ -11,7 +11,7 @@ source "$SCRIPT_DIR/../../../utils/common.sh"
 # intentionally NOT in this list — values.template.yaml only references SERVICE_ACCOUNT_ASSISTANT.
 # Secrets (RASA_PRO_LICENSE, OPENAI_API_KEY) are checked separately below — validate_variables
 # echoes values, which would defeat the secret-masking elsewhere.
-validate_variables NAME NAMESPACE AWS_REGION DOMAIN DB_HOST DB_ASSISTANT_DATABASE DB_ASSISTANT_USERNAME REDIS_HOST REDIS_USER REDIS_CLUSTER_NAME MODEL_BUCKET SERVICE_ACCOUNT_ASSISTANT ACTION_SERVER_IMAGE_REPO ACTION_SERVER_IMAGE_TAG
+validate_variables NAME NAMESPACE AWS_REGION REGION DOMAIN DB_HOST DB_ASSISTANT_DATABASE DB_ASSISTANT_USERNAME REDIS_HOST REDIS_USER REDIS_CLUSTER_NAME MODEL_BUCKET SERVICE_ACCOUNT_ASSISTANT ACTION_SERVER_IMAGE_REPO ACTION_SERVER_IMAGE_TAG
 
 # Presence-only check for secrets (no value printing). Fail fast with a clear message
 # instead of silently storing the placeholder error string in rasa-secrets.

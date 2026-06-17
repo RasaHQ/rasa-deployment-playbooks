@@ -12,7 +12,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../../../utils/common.sh"
 
-validate_variables DOMAIN NAMESPACE
+validate_variables DOMAIN NAMESPACE NAME
 
 ASSISTANT_URL="${ASSISTANT_URL:-https://assistant.${DOMAIN}}"
 COOKIE_JAR="$(mktemp)"
@@ -28,7 +28,7 @@ need_cmd() {
 
 need_cmd curl
 need_cmd jq
-
+need_cmd uuidgen
 json_get() {
   local filter="$1"
   jq -r "$filter" "$TMP_RESPONSE"
@@ -67,7 +67,7 @@ if [[ -n "${KUBECONFIG:-}" ]] && command -v kubectl >/dev/null 2>&1; then
 
   print_info "Checking A2A Istio resources..."
   kubectl get destinationrule -n "$NAMESPACE" -l "istio.io/rev" 2>/dev/null || \
-    kubectl get destinationrule -n "$NAMESPACE" | grep -E 'rasa-a2a-sticky|NAME' || true
+    kubectl get destinationrule -n "$NAMESPACE" | grep -E "${NAME}-rasa-a2a-sticky|rasa-a2a-sticky" || true
   kubectl get envoyfilter -n istio-system "$NAME-a2a-context-id-extract" >/dev/null 2>&1 && \
     print_info "EnvoyFilter $NAME-a2a-context-id-extract: present" || \
     print_info "EnvoyFilter $NAME-a2a-context-id-extract: not found (apply setup-ingress.sh)"
