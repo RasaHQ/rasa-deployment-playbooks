@@ -8,6 +8,9 @@ set -euo pipefail
 #   source aws/setup/environment-variables.sh
 #   export KUBECONFIG=$(pwd)/kubeconfig   # optional, for cluster checks
 #   ./aws/rasa/assistant/verify-a2a-deployment.sh
+#
+# If curl fails DNS while dig works (common on macOS), the script resolves via dig
+# and passes --resolve to curl. Set VERIFY_A2A_SKIP_DNS_RESOLVE=1 to disable.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../../../utils/common.sh"
@@ -15,8 +18,10 @@ source "$SCRIPT_DIR/../../../utils/common.sh"
 validate_variables DOMAIN NAMESPACE NAME
 
 ASSISTANT_URL="${ASSISTANT_URL:-https://assistant.${DOMAIN}}"
+ASSISTANT_HOST="assistant.${DOMAIN}"
 COOKIE_JAR="$(mktemp)"
 TMP_RESPONSE="$(mktemp)"
+CURL_RESOLVE_ARGS=()
 trap 'rm -f "$COOKIE_JAR" "$TMP_RESPONSE"' EXIT
 
 need_cmd() {
@@ -29,6 +34,34 @@ need_cmd() {
 need_cmd curl
 need_cmd jq
 need_cmd uuidgen
+
+# macOS often resolves via `dig` before `curl`/`getaddrinfo` sees new records.
+# Pre-resolve with dig and pass --resolve to curl so verification matches public DNS.
+setup_curl_resolve() {
+  local host="$1"
+  local ips=""
+
+  if [[ "${VERIFY_A2A_SKIP_DNS_RESOLVE:-}" == "1" ]]; then
+    return 0
+  fi
+
+  need_cmd dig
+  ips="$(dig +time=3 +tries=2 +short A "$host" 2>/dev/null | grep -E '^[0-9]+\.' || true)"
+  if [[ -z "$ips" ]]; then
+    return 1
+  fi
+
+  CURL_RESOLVE_ARGS=()
+  while IFS= read -r ip; do
+    [[ -n "$ip" ]] && CURL_RESOLVE_ARGS+=(--resolve "${host}:443:${ip}")
+  done <<< "$ips"
+  return 0
+}
+
+a2a_curl() {
+  # Prefer IPv4; Route53 alias AAAA (NAT64) can confuse curl on some networks.
+  curl -sS -4 "${CURL_RESOLVE_ARGS[@]}" "$@"
+}
 json_get() {
   local filter="$1"
   jq -r "$filter" "$TMP_RESPONSE"
@@ -36,7 +69,7 @@ json_get() {
 
 a2a_post() {
   local payload="$1"
-  curl -sS -f \
+  a2a_curl -f \
     -c "$COOKIE_JAR" -b "$COOKIE_JAR" \
     -H "Content-Type: application/json" \
     -X POST "$ASSISTANT_URL/" \
@@ -45,6 +78,21 @@ a2a_post() {
 }
 
 print_info "Assistant URL: $ASSISTANT_URL"
+
+print_info "Checking DNS for $ASSISTANT_HOST..."
+if setup_curl_resolve "$ASSISTANT_HOST"; then
+  if [[ ${#CURL_RESOLVE_ARGS[@]} -gt 0 ]]; then
+    print_info "DNS OK via dig (${#CURL_RESOLVE_ARGS[@]} A record(s)); curl will use --resolve (set VERIFY_A2A_SKIP_DNS_RESOLVE=1 to disable)."
+  else
+    print_info "DNS resolve helper disabled (VERIFY_A2A_SKIP_DNS_RESOLVE=1)."
+  fi
+else
+  print_error "Could not resolve A records for $ASSISTANT_HOST (dig returned nothing)."
+  print_error "Your browser may work while curl fails until macOS refreshes its DNS cache."
+  print_error "Try: dig +short A $ASSISTANT_HOST"
+  print_error "Then: sudo dscacheutil -flushcache && sudo killall -HUP mDNSResponder"
+  exit 1
+fi
 
 # --- Cluster pre-checks (optional) -------------------------------------------
 
@@ -78,7 +126,7 @@ fi
 # --- 1. AgentCard -------------------------------------------------------------
 
 print_info "Test 1: GET AgentCard"
-curl -sS -f "$ASSISTANT_URL/.well-known/agent-card.json" -o "$TMP_RESPONSE"
+a2a_curl -f "$ASSISTANT_URL/.well-known/agent-card.json" -o "$TMP_RESPONSE"
 CARD_URL="$(json_get '.url // empty')"
 CARD_NAME="$(json_get '.name // .description // empty')"
 print_info "AgentCard url: ${CARD_URL:-<missing>}"

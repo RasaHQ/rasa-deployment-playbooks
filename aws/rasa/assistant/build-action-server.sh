@@ -46,14 +46,15 @@ print_info "Logging in to ECR: $ECR_REGISTRY"
 aws ecr get-login-password --region "$AWS_REGION" \
   | docker login --username AWS --password-stdin "$ECR_REGISTRY"
 
-print_info "Building action server image..."
-docker build \
+# EKS nodes in this playbook use x86_64 (m6i). Build for linux/amd64 even on Apple Silicon.
+BUILD_PLATFORM="${BUILD_PLATFORM:-linux/amd64}"
+print_info "Building action server image for platform: $BUILD_PLATFORM"
+docker buildx build \
+  --platform "$BUILD_PLATFORM" \
   -f "$SCRIPT_DIR/Dockerfile.actions" \
   -t "${ACTION_SERVER_IMAGE_REPO}:${ACTION_SERVER_IMAGE_TAG}" \
+  --push \
   "$A2A_SERVER_AGENT_DIR"
-
-print_info "Pushing action server image..."
-docker push "${ACTION_SERVER_IMAGE_REPO}:${ACTION_SERVER_IMAGE_TAG}"
 
 print_info "Action server image pushed successfully."
 print_info "Ensure ACTION_SERVER_IMAGE_REPO matches the pushed URI, then run setup-assistant.sh."

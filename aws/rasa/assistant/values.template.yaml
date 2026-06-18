@@ -1,3 +1,7 @@
+rasaProLicense:
+  secretName: rasa-secrets
+  secretKey: rasaProLicense
+
 rasa:
   enabled: true
   replicaCount: 3
@@ -141,6 +145,20 @@ actionServer:
   image:
     repository: ${ACTION_SERVER_IMAGE_REPO}
     tag: ${ACTION_SERVER_IMAGE_TAG}
+    # Force pull after rebuild — :latest + IfNotPresent can leave stale layers on nodes.
+    pullPolicy: Always
+  # rasa-pro ENTRYPOINT is `rasa`; args must NOT include `rasa` again.
+  # Explicit args override the image CMD and avoid `rasa rasa run actions`.
+  args:
+    - run
+    - actions
+  # Custom image is based on rasa-pro (not rasa-sdk) — requires RASA_LICENSE at runtime.
+  additionalEnv:
+    - name: RASA_LICENSE
+      valueFrom:
+        secretKeyRef:
+          name: rasa-secrets
+          key: rasaProLicense
 # https://rasa.com/docs/reference/integrations/tracing
 tracing:
     enabled: false
