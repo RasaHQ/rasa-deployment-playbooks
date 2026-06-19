@@ -47,7 +47,10 @@ export DB_STUDIO_DATABASE="studio"
 export DB_STUDIO_USERNAME="studio"
 # The database name for Keycloak.
 export DB_KEYCLOAK_DATABASE="keycloak"
-# The version of PostgreSQL Container to use for applying some configuration to the database.
+# RDS PostgreSQL engine version (full minor, e.g. 17.10). Must exist in your region —
+# list with: aws rds describe-db-engine-versions --engine postgres --query "DBEngineVersions[?starts_with(EngineVersion, \`17\`)].EngineVersion" --output text
+export RDS_POSTGRES_ENGINE_VERSION="17.10"
+# The major version for the db-init Job postgres image tag (docker hub major tag).
 export PG_VERSION=17
 # The username for the ElastiCache Redis IAM role.
 export REDIS_USER="assistant"
@@ -96,6 +99,7 @@ echo "DB studio database:     $DB_STUDIO_DATABASE"
 echo "DB studio username:     $DB_STUDIO_USERNAME"
 echo "DB keycloak database:   $DB_KEYCLOAK_DATABASE"
 echo "Redis user:             $REDIS_USER"
+echo "RDS Postgres version:   $RDS_POSTGRES_ENGINE_VERSION"
 echo "PostgreSQL version:     $PG_VERSION"
 echo "--------------------------------"
 echo "If any of the above values are incorrect or blank, please update the file and re-run."

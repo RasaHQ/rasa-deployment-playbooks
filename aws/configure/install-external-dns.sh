@@ -8,8 +8,9 @@ source "$SCRIPT_DIR/../../utils/common.sh"
 
 #Add the Helm repo to your local machine so it can find the installation Helm chart, which enables automated installation:
 print_info "Adding the Helm repo for external-dns..."
-helm repo add external-dns https://kubernetes-sigs.github.io/external-dns/
-helm repo update
+helm repo add external-dns https://kubernetes-sigs.github.io/external-dns/ --force-update
+# Update only this repo — a full `helm repo update` fails if another repo (e.g. bitnami from Kafka) is unreachable.
+helm repo update external-dns
 
 # Substitute the values in the template file with the actual values:
 envsubst < $SCRIPT_DIR/external-dns-values.template.yaml > $SCRIPT_DIR/external-dns-values.yaml
