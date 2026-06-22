@@ -15,7 +15,7 @@ rm -rf $SCRIPT_DIR/repos
 # This Helm chart contains instructions for setting up theRasa bot and Analytics components.
 print_info "Pulling Rasa Helm chart..."
 mkdir $SCRIPT_DIR/repos
-helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 2.0.5 --untar --destination $SCRIPT_DIR/repos/rasa-helm
+helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 2.0.6 --untar --destination $SCRIPT_DIR/repos/rasa-helm
 
 print_info "Getting storage account key..."
 SAKEYS_OUTPUT_OUTPUT=$(az storage account keys list \
