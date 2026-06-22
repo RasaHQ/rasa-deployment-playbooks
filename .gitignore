@@ -3,6 +3,7 @@ kubeconfig
 gke_gcloud_auth_plugin_cache
 istio-*/
 .DS_Store
+.vscode/
 
 # Generated files
 gcp/configure/cert-manager-certificate-issuer.yaml
